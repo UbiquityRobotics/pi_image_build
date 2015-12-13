@@ -314,15 +314,12 @@ EOF
 
 function configure_hardware() {
     # Ported
-    # https://twolife.be/raspbian/pool/main/bcm-videocore-pkgconfig/bcm-videocore-pkgconfig_1.dsc
-    # https://twolife.be/raspbian/pool/main/flash-kernel/flash-kernel_3.35+rpi2.dsc
-    # https://repositories.collabora.co.uk/debian/pool/rpi2/f/flash-kernel/flash-kernel_3.35.co1.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/r/raspberrypi-firmware/raspberrypi-firmware_1.20150918-1.dsc # Foundation's Kernel
+    # http://archive.raspberrypi.org/debian/pool/main/r/raspberrypi-firmware/raspberrypi-firmware_1.20151118-1.dsc # Foundation's Kernel
     # https://launchpad.net/~fo0bar/+archive/ubuntu/rpi2-nightly/+files/xserver-xorg-video-fbturbo_0%7Egit.20151007.f9a6ed7-0%7Enightly.dsc
 
     # Kernel and Firmware - Pending
+    # https://twolife.be/raspbian/pool/main/bcm-videocore-pkgconfig/bcm-videocore-pkgconfig_1.dsc    
     # https://twolife.be/raspbian/pool/main/linux/linux_4.1.8-1+rpi1.dsc
-    # https://twolife.be/raspbian/pool/main/raspberrypi/raspberrypi_1.20150920-1.dsc # Alternate kernel and bootloader
     # http://archive.raspberrypi.org/debian/pool/main/r/raspi-copies-and-fills/raspi-copies-and-fills_0.5-1.dsc # FTBFS in a PPA
 
     local FS="${1}"
@@ -334,10 +331,9 @@ function configure_hardware() {
     # gdebi-core used for installing copies-and-fills and omxplayer
     chroot $R apt-get -y install gdebi-core
     local COFI="http://archive.raspberrypi.org/debian/pool/main/r/raspi-copies-and-fills/raspi-copies-and-fills_0.5-1_armhf.deb"
-    local OMX="http://omxplayer.sconde.net/builds/omxplayer_0.3.6~git20150912~d99bd86_armhf.deb"
 
     # Install the RPi PPA
-    chroot $R apt-add-repository -y ppa:flexiondotorg/${RELEASE}-pi
+    chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
     chroot $R apt-get update
 
     # Firmware Kernel installation
@@ -361,6 +357,7 @@ Section "Device"
 EndSection
 EOM
         # omxplayer
+        local OMX="http://omxplayer.sconde.net/builds/omxplayer_0.3.6~git20150912~d99bd86_armhf.deb"
         # - Requires: libpcre3 libfreetype6 fonts-freefont-ttf dbus libssl1.0.0 libsmbclient libssh-4
         wget -c "${OMX}" -O $R/tmp/omxplayer.deb
         chroot $R gdebi -n /tmp/omxplayer.deb
@@ -424,7 +421,6 @@ EOM
         echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash" > $R/boot/cmdline.txt
     else
         echo "dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash" > $R/boot/cmdline.txt
-        #sed -i 's/#hdmi_drive=2/hdmi_drive=2/' $R/boot/config.txt
         sed -i 's/#framebuffer_depth=16/framebuffer_depth=32/' $R/boot/config.txt
         sed -i 's/#framebuffer_ignore_alpha=0/framebuffer_ignore_alpha=1/' $R/boot/config.txt
     fi
@@ -438,13 +434,14 @@ function install_software() {
     # http://archive.raspberrypi.org/debian/pool/main/r/raspi-gpio/raspi-gpio_0.20150914.dsc
     # http://archive.raspberrypi.org/debian/pool/main/s/sonic-pi/sonic-pi_2.7.0-1.dsc
     # http://archive.raspberrypi.org/debian/pool/main/p/picamera/picamera_1.10-1.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/n/nuscratch/nuscratch_20150916.dsc
+    # http://archive.raspberrypi.org/debian/pool/main/n/nuscratch/nuscratch_20150916.dsc # Modify wrapper in debian/scratch to just be "sudo "
     # http://archive.raspberrypi.org/debian/pool/main/r/rtimulib/rtimulib_7.2.1-3.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/r/raspi-config/raspi-config_20150923.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/r/rpi.gpio/rpi.gpio_0.5.11-1+jessie.dsc
+    # http://archive.raspberrypi.org/debian/pool/main/r/raspi-config/raspi-config_20151117.dsc
+    # http://archive.raspberrypi.org/debian/pool/main/r/rpi.gpio/rpi.gpio_0.5.11-1+jessie.dsc # Hardcode target Python 3.x version in debian/rules
     # http://archive.raspberrypi.org/debian/pool/main/s/spidev/spidev_2.0~git20150907.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/c/codebug-tether/codebug-tether_0.4.3-1.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/c/codebug-i2c-tether/codebug-i2c-tether_0.2.3-1.dsc
+    # http://archive.raspberrypi.org/debian/pool/main/c/codebug-tether/codebug-tether_0.4.3-1.dsc # Hardcode target Python 3.x in debian/rules
+    # http://archive.raspberrypi.org/debian/pool/main/c/codebug-i2c-tether/codebug-i2c-tether_0.2.3-1.dsc # Hardcode target Python 3.x in debian/rules
+    # http://archive.raspberrypi.org/debian/pool/main/c/compoundpi/compoundpi_0.4-1.dsc
 
     # FTBFS
     # http://archive.raspberrypi.org/debian/pool/main/g/gst-omx1.0/gst-omx1.0_1.0.0.1-0+rpi15.dsc
@@ -463,6 +460,7 @@ function install_software() {
     # https://twolife.be/raspbian/pool/main/kodi/kodi_15.1+dfsg1-2+rpi1.dsc # FTBFS
     # https://twolife.be/raspbian/pool/main/omxplayer/omxplayer_0.git20150303-1.dsc
 
+    local NODERED="http://archive.raspberrypi.org/debian/pool/main/n/nodered/nodered_0.12.1_armhf.deb"
     local SCRATCH="http://archive.raspberrypi.org/debian/pool/main/s/scratch/scratch_1.4.20131203-2_all.deb"
     local WIRINGPI="http://archive.raspberrypi.org/debian/pool/main/w/wiringpi/wiringpi_2.24_armhf.deb"
     local SENSEHAT2="http://archive.raspberrypi.org/debian/pool/main/p/python-sense-hat/python-sense-hat_2.1.0-1_armhf.deb"
@@ -471,16 +469,16 @@ function install_software() {
     local ASTROPI3="http://archive.raspberrypi.org/debian/pool/main/a/astropi/python3-astropi_1.1.5-1_armhf.deb"
     local TBOPLAYER_URL="https://raw.githubusercontent.com/KenT2/tboplayer/master/"
 
-    if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
+	if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ] || [ "${FLAVOUR}" == "ubuntu-mate" ]; then
         # Install the RPi PPA
-        chroot $R apt-add-repository -y ppa:flexiondotorg/${RELEASE}-pi
-        chroot $R apt-add-repository -y ppa:flexiondotorg/minecraft
+        chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
         chroot $R apt-get update
 
         # Python
         chroot $R apt-get -y install python-minimal python3-minimal
         chroot $R apt-get -y install python-dev python3-dev
         chroot $R apt-get -y install python-pip python3-pip
+        chroot $R apt-get -y install idle idle3
 
         # Python extras a Raspberry Pi hacker expects to have available ;-)
         chroot $R apt-get -y install raspi-gpio
@@ -505,6 +503,12 @@ function install_software() {
         chroot $R gdebi -n /tmp/astropi2.deb
         wget -c "${ASTROPI3}" -O $R/tmp/astropi3.deb
         chroot $R gdebi -n /tmp/astropi3.deb
+	fi
+
+    if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
+        # Install the Minecraft PPA
+        chroot $R apt-add-repository -y ppa:flexiondotorg/minecraft
+        chroot $R apt-get update
 
         # tboplayer
         chroot $R apt-get -y install ffmpeg youtube-dl youtube-dlg
@@ -558,6 +562,10 @@ MimeType=video/dv;video/mpeg;video/x-mpeg;video/msvideo;video/quicktime;video/x-
 Keywords=Player;Audio;Video;
 EOM
 
+        # nodered
+        wget -c "${NODERED}" -O $R/tmp/nodered.deb
+        chroot $R gdebi -n /tmp/nodered.deb
+
         # Scratch (nuscratch)
         # - Requires: scratch wiringpi
         wget -c "${WIRINGPI}" -O $R/tmp/wiringpi.deb
@@ -578,7 +586,7 @@ EOM
         # Sonic Pi
         chroot $R apt-get -y install sonic-pi
 
-        # raspi-config - Needs forking/modifying to support Ubuntu MATE 15.10
+        # raspi-config - Needs forking/modifying to support Ubuntu
         #chroot $R apt-get -y install raspi-config rc-ui
     fi
 }

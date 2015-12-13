@@ -49,12 +49,12 @@ function publish_image() {
     local HASH=md5
     if [ -n "${DEST}" ]; then
         echo "Sending to: ${DEST}"
-        if [ ! -e "${BASEDIR}/${IMAGE}.bz2" ]; then
-            bzip2 ${BASEDIR}/${IMAGE}
+        if [ ! -e "${BASEDIR}/${IMAGE}.xz" ]; then
+            xz ${BASEDIR}/${IMAGE}
         fi
-        make_hash "${BASEDIR}/${IMAGE}.bz2" ${HASH}
-        rsync -rvl -e 'ssh -c arcfour128' --progress "${BASEDIR}/${IMAGE}.bz2" ${DEST}:ISO-Mirror/${RELEASE}/armhf/
-        rsync -rvl -e 'ssh -c arcfour128' --progress "${BASEDIR}/${IMAGE}.bz2.${HASH}" ${DEST}:ISO-Mirror/${RELEASE}/armhf/
+        make_hash "${BASEDIR}/${IMAGE}.xz" ${HASH}
+        rsync -rvl -e 'ssh -c aes128-gcm@openssh.com' --progress "${BASEDIR}/${IMAGE}.xz" ${DEST}:ISO-Mirror/${RELEASE}/armhf/
+        rsync -rvl -e 'ssh -c aes128-gcm@openssh.com' --progress "${BASEDIR}/${IMAGE}.xz.${HASH}" ${DEST}:ISO-Mirror/${RELEASE}/armhf/
     fi
 }
 
@@ -69,8 +69,8 @@ function publish_tarball() {
             fi
             make_hash "${BASEDIR}/${TARBALL}" ${HASH}
             echo "Sending to: ${DEST}"
-            rsync -rvl -e 'ssh -c arcfour128' --progress "${BASEDIR}/${TARBALL}" ${DEST}:ISO-Mirror/${RELEASE}/armhf/
-            rsync -rvl -e 'ssh -c arcfour128' --progress "${BASEDIR}/${TARBALL}.${HASH}" ${DEST}:ISO-Mirror/${RELEASE}/armhf/
+            rsync -rvl -e 'ssh -c aes128-gcm@openssh.com' --progress "${BASEDIR}/${TARBALL}" ${DEST}:ISO-Mirror/${RELEASE}/armhf/
+            rsync -rvl -e 'ssh -c aes128-gcm@openssh.com' --progress "${BASEDIR}/${TARBALL}.${HASH}" ${DEST}:ISO-Mirror/${RELEASE}/armhf/
         fi
     fi
 }

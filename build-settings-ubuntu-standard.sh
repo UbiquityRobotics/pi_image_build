@@ -19,8 +19,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ########################################################################
 
-FLAVOUR="ubuntu-mate"
-FLAVOUR_NAME="Ubuntu MATE"
+FLAVOUR="ubuntu-standard"
+FLAVOUR_NAME="Ubuntu"
 RELEASE="wily"
 VERSION="15.10.1"
 QUALITY=""
@@ -34,10 +34,10 @@ FS_SIZE=4
 # Either 0 or 1.
 # - 0 don't make generic rootfs tarball
 # - 1 make a generic rootfs tarball
-MAKE_TARBALL=1
+MAKE_TARBALL=0
 
-TARBALL="${FLAVOUR}-${VERSION}${QUALITY}-desktop-armhf-rootfs.tar.bz2"
-IMAGE="${FLAVOUR}-${VERSION}${QUALITY}-desktop-armhf-raspberry-pi-2.img"
+TARBALL="${FLAVOUR}-${VERSION}${QUALITY}-server-armhf-rootfs.tar.bz2"
+IMAGE="${FLAVOUR}-${VERSION}${QUALITY}-server-armhf-raspberry-pi-2.img"
 BASEDIR=${HOME}/PiFlavourMaker/${RELEASE}
 BUILDDIR=${BASEDIR}/${FLAVOUR}
 BASE_R=${BASEDIR}/base
