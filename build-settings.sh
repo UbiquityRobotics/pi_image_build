@@ -21,9 +21,9 @@
 
 FLAVOUR="ubuntu-mate"
 FLAVOUR_NAME="Ubuntu MATE"
-RELEASE="wily"
-VERSION="15.10.1"
-QUALITY=""
+RELEASE="xenial"
+VERSION="16.04"
+QUALITY="-beta2"
 
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"

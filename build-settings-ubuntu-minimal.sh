@@ -21,9 +21,9 @@
 
 FLAVOUR="ubuntu-minimal"
 FLAVOUR_NAME="Ubuntu"
-RELEASE="wily"
-VERSION="15.10.1"
-QUALITY=""
+RELEASE="xenial"
+VERSION="16.04"
+QUALITY="-beta2"
 
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"
@@ -36,7 +36,7 @@ FS_SIZE=4
 # - 1 make a generic rootfs tarball
 MAKE_TARBALL=0
 
-TARBALL="${FLAVOUR}-${VERSION}${QUALITY}-server--armhf-rootfs.tar.bz2"
+TARBALL="${FLAVOUR}-${VERSION}${QUALITY}-server-armhf-rootfs.tar.bz2"
 IMAGE="${FLAVOUR}-${VERSION}${QUALITY}-server-armhf-raspberry-pi-2.img"
 BASEDIR=${HOME}/PiFlavourMaker/${RELEASE}
 BUILDDIR=${BASEDIR}/${FLAVOUR}
