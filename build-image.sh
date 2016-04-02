@@ -105,12 +105,6 @@ deb-src http://ports.ubuntu.com/ ${RELEASE}-security main restricted universe mu
 deb http://ports.ubuntu.com/ ${RELEASE}-backports main restricted universe multiverse
 deb-src http://ports.ubuntu.com/ ${RELEASE}-backports main restricted universe multiverse
 EOM
-
-    cat <<EOM >$R/etc/apt/apt.conf.d/50raspi
-# Never use pdiffs, current implementation is very slow on low-powered devices
-Acquire::PDiffs "0";
-EOM
-
 }
 
 function apt_upgrade() {
@@ -289,39 +283,7 @@ EOM
     fi
 }
 
-function add_scripts() {
-    if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-        cat <<'EOF' >$R/usr/local/bin/graphical
-#!/usr/bin/env bash
-# Call with either enable or disable as first parameter
-
-if [ $(id -u) -ne 0 ]; then
-    echo "ERROR! $(basename $) must be run as 'root'."
-    exit 1
-fi
-
-if [ "$1" == "enable" ]; then
-    systemctl set-default graphical.target
-elif [ "$1" == "disable" ]; then
-    systemctl set-default multi-user.target
-else
-    echo "$(basename $0) should be invoked with with either 'enable' or 'disable' as first parameter."
-fi
-EOF
-        chmod +x $R/usr/local/bin/graphical
-    fi
-}
-
 function configure_hardware() {
-    # Ported
-    # http://archive.raspberrypi.org/debian/pool/main/r/raspberrypi-firmware/raspberrypi-firmware_1.20151118-1.dsc # Foundation's Kernel
-    # https://launchpad.net/~fo0bar/+archive/ubuntu/rpi2-nightly/+files/xserver-xorg-video-fbturbo_0%7Egit.20151007.f9a6ed7-0%7Enightly.dsc
-
-    # Kernel and Firmware - Pending
-    # https://twolife.be/raspbian/pool/main/bcm-videocore-pkgconfig/bcm-videocore-pkgconfig_1.dsc    
-    # https://twolife.be/raspbian/pool/main/linux/linux_4.1.8-1+rpi1.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/r/raspi-copies-and-fills/raspi-copies-and-fills_0.5-1.dsc # FTBFS in a PPA
-
     local FS="${1}"
     if [ "${FS}" != "ext4" ] && [ "${FS}" != 'f2fs' ]; then
         echo "ERROR! Unsupport filesystem requested. Exitting."
@@ -339,25 +301,14 @@ function configure_hardware() {
     # Firmware Kernel installation
     chroot $R apt-get -y install libraspberrypi-bin libraspberrypi-dev \
     libraspberrypi-doc libraspberrypi0 raspberrypi-bootloader rpi-update
-    chroot $R apt-get -y install linux-firmware linux-firmware-nonfree
-    chroot $R rpi-update
-
-    # Add VideoCore libs to ld.so
-    echo "/opt/vc/lib" > $R/etc/ld.so.conf.d/vmcs.conf
+    chroot $R apt-get -y install bluez-firmware linux-firmware linux-firmware-nonfree pi-bluetooth
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
         # Install X drivers
         chroot $R apt-get -y install xserver-xorg-video-fbturbo
-        cat <<EOM >$R/etc/X11/xorg.conf
-Section "Device"
-    Identifier "Raspberry Pi FBDEV"
-    Driver "fbturbo"
-    Option "fbdev" "/dev/fb0"
-    Option "SwapbuffersWait" "true"
-EndSection
-EOM
+
         # omxplayer
-        local OMX="http://omxplayer.sconde.net/builds/omxplayer_0.3.6~git20150912~d99bd86_armhf.deb"
+        local OMX="http://omxplayer.sconde.net/builds/omxplayer_0.3.7~git20160206~cb91001_armhf.deb"
         # - Requires: libpcre3 libfreetype6 fonts-freefont-ttf dbus libssl1.0.0 libsmbclient libssh-4
         wget -c "${OMX}" -O $R/tmp/omxplayer.deb
         chroot $R gdebi -n /tmp/omxplayer.deb
@@ -373,34 +324,13 @@ EOM
     # Hardware - Create a fake HW clock and add rng-tools
     chroot $R apt-get -y install fake-hwclock fbset i2c-tools rng-tools
 
-    # Load sound module on boot and enable HW random number generator
-    cat <<EOM >$R/etc/modules-load.d/rpi2.conf
-snd_bcm2835
-bcm2708_rng
-EOM
-
-    # Blacklist platform modules not applicable to the RPi2
-    cat <<EOM >$R/etc/modprobe.d/blacklist-rpi2.conf
-blacklist snd_soc_pcm512x_i2c
-blacklist snd_soc_pcm512x
-blacklist snd_soc_tas5713
-blacklist snd_soc_wm8804
-EOM
+    # Install Raspberry Pi system tweaks
+    chroot $R apt-get -y install raspberrypi-general-mods raspberrypi-sys-mods
 
     # Disable TLP
     if [ -f $R/etc/default/tlp ]; then
         sed -i s'/TLP_ENABLE=1/TLP_ENABLE=0/' $R/etc/default/tlp
     fi
-
-    # udev rules
-    printf 'SUBSYSTEM=="vchiq", GROUP="video", MODE="0660"\n' > $R/etc/udev/rules.d/10-local-rpi.rules
-    printf "SUBSYSTEM==\"gpio*\", PROGRAM=\"/bin/sh -c 'chown -R root:gpio /sys/class/gpio && chmod -R 770 /sys/class/gpio; chown -R root:gpio /sys/devices/virtual/gpio && chmod -R 770 /sys/devices/virtual/gpio'\"\n" > $R/etc/udev/rules.d/99-com.rules
-    printf 'SUBSYSTEM=="input", GROUP="input", MODE="0660"\n' >> $R/etc/udev/rules.d/99-com.rules
-    printf 'SUBSYSTEM=="i2c-dev", GROUP="i2c", MODE="0660"\n' >> $R/etc/udev/rules.d/99-com.rules
-    printf 'SUBSYSTEM=="spidev", GROUP="spi", MODE="0660"\n' >> $R/etc/udev/rules.d/99-com.rules
-    cat <<EOF > $R/etc/udev/rules.d/40-scratch.rules
-ATTRS{idVendor}=="0694", ATTRS{idProduct}=="0003", SUBSYSTEMS=="usb", ACTION=="add", MODE="0666", GROUP="plugdev"
-EOF
 
     # copies-and-fills
     wget -c "${COFI}" -O $R/tmp/cofi.deb
@@ -416,7 +346,6 @@ proc            /proc           proc    defaults          0       0
 EOM
 
     # Set up firmware config
-    wget -c https://raw.githubusercontent.com/Evilpaul/RPi-config/master/config.txt -O $R/boot/config.txt
     if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
         echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash" > $R/boot/cmdline.txt
     else
@@ -430,55 +359,15 @@ EOM
 }
 
 function install_software() {
-    # https://archive.raspberrypi.org/debian/pool/main/m/minecraft-pi/minecraft-pi_0.1.1-4.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/r/raspi-gpio/raspi-gpio_0.20150914.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/s/sonic-pi/sonic-pi_2.7.0-1.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/p/picamera/picamera_1.10-1.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/n/nuscratch/nuscratch_20150916.dsc # Modify wrapper in debian/scratch to just be "sudo "
-    # http://archive.raspberrypi.org/debian/pool/main/r/rtimulib/rtimulib_7.2.1-3.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/r/raspi-config/raspi-config_20151117.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/r/rpi.gpio/rpi.gpio_0.5.11-1+jessie.dsc # Hardcode target Python 3.x version in debian/rules
-    # http://archive.raspberrypi.org/debian/pool/main/s/spidev/spidev_2.0~git20150907.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/c/codebug-tether/codebug-tether_0.4.3-1.dsc # Hardcode target Python 3.x in debian/rules
-    # http://archive.raspberrypi.org/debian/pool/main/c/codebug-i2c-tether/codebug-i2c-tether_0.2.3-1.dsc # Hardcode target Python 3.x in debian/rules
-    # http://archive.raspberrypi.org/debian/pool/main/c/compoundpi/compoundpi_0.4-1.dsc
-
-    # FTBFS
-    # http://archive.raspberrypi.org/debian/pool/main/g/gst-omx1.0/gst-omx1.0_1.0.0.1-0+rpi15.dsc
-    # http://archive.raspberrypi.org/debian/pool/main/r/rc-gui/rc-gui_0.1-1.dsc
-
-    # Pending
-    # http://archive.raspberrypi.org/debian/pool/main/p/python-sense-hat/python-sense-hat_2.1.0-1.dsc # FTBFS
-    # http://archive.raspberrypi.org/debian/pool/main/a/astropi/astropi_1.1.5-1.dsc # REQ Sense-hat
-    # http://archive.raspberrypi.org/debian/pool/main/s/sense-hat/sense-hat_1.2.dsc # REQ python-sense-hat
-    # http://archive.raspberrypi.org/debian/pool/main/p/pgzero/pgzero_1.0.2-1.dsc
-    # https://archive.raspberrypi.org/debian/pool/main/e/epiphany-browser/epiphany-browser_3.8.2.0-0rpi23.dsc
-
-    # Kodi - Pending
-    # http://archive.ubuntu.com/ubuntu/pool/universe/a/afpfs-ng/afpfs-ng_0.8.1-5ubuntu1.dsc
-    # http://archive.mene.za.net/raspbian/pool/unstable/k/kodi/kodi_15.1-1%7ejessie.dsc
-    # https://twolife.be/raspbian/pool/main/kodi/kodi_15.1+dfsg1-2+rpi1.dsc # FTBFS
-    # https://twolife.be/raspbian/pool/main/omxplayer/omxplayer_0.git20150303-1.dsc
-
-    local NODERED="http://archive.raspberrypi.org/debian/pool/main/n/nodered/nodered_0.12.1_armhf.deb"
     local SCRATCH="http://archive.raspberrypi.org/debian/pool/main/s/scratch/scratch_1.4.20131203-2_all.deb"
-    local WIRINGPI="http://archive.raspberrypi.org/debian/pool/main/w/wiringpi/wiringpi_2.24_armhf.deb"
-    local SENSEHAT2="http://archive.raspberrypi.org/debian/pool/main/p/python-sense-hat/python-sense-hat_2.1.0-1_armhf.deb"
-    local SENSEHAT3="http://archive.raspberrypi.org/debian/pool/main/p/python-sense-hat/python3-sense-hat_2.1.0-1_armhf.deb"
-    local ASTROPI2="http://archive.raspberrypi.org/debian/pool/main/a/astropi/python-astropi_1.1.5-1_armhf.deb"
-    local ASTROPI3="http://archive.raspberrypi.org/debian/pool/main/a/astropi/python3-astropi_1.1.5-1_armhf.deb"
+    local WIRINGPI="http://archive.raspberrypi.org/debian/pool/main/w/wiringpi/wiringpi_2.32_armhf.deb"
     local TBOPLAYER_URL="https://raw.githubusercontent.com/KenT2/tboplayer/master/"
 
-	if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ] || [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-        # Install the RPi PPA
-        chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
-        chroot $R apt-get update
-
+    if [ "${FLAVOUR}" != "ubuntu-minimal" ]; then
         # Python
         chroot $R apt-get -y install python-minimal python3-minimal
         chroot $R apt-get -y install python-dev python3-dev
         chroot $R apt-get -y install python-pip python3-pip
-        chroot $R apt-get -y install idle idle3
 
         # Python extras a Raspberry Pi hacker expects to have available ;-)
         chroot $R apt-get -y install raspi-gpio
@@ -489,26 +378,20 @@ function install_software() {
         chroot $R apt-get -y install python-codebug-i2c-tether python3-codebug-i2c-tether
         chroot $R apt-get -y install python-picamera python3-picamera
         chroot $R apt-get -y install python-rtimulib python3-rtimulib
+        chroot $R apt-get -y install python-sense-hat python3-sense-hat
+        chroot $R apt-get -y install python-astropi python3-astropi
         chroot $R apt-get -y install python-pil python3-pil
+        chroot $R apt-get -y install python-gpiozero python3-gpiozero
         chroot $R apt-get -y install python-pygame
-
-        # Python Sense Hat
-        wget -c "${SENSEHAT2}" -O $R/tmp/sensehat2.deb
-        chroot $R gdebi -n /tmp/sensehat2.deb
-        wget -c "${SENSEHAT3}" -O $R/tmp/sensehat3.deb
-        chroot $R gdebi -n /tmp/sensehat3.deb
-
-        # Astro Pi
-        wget -c "${ASTROPI2}" -O $R/tmp/astropi2.deb
-        chroot $R gdebi -n /tmp/astropi2.deb
-        wget -c "${ASTROPI3}" -O $R/tmp/astropi3.deb
-        chroot $R gdebi -n /tmp/astropi3.deb
-	fi
+    fi
 
     if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
         # Install the Minecraft PPA
         chroot $R apt-add-repository -y ppa:flexiondotorg/minecraft
         chroot $R apt-get update
+
+        # Python IDLE
+        chroot $R apt-get -y install idle idle3
 
         # tboplayer
         chroot $R apt-get -y install ffmpeg youtube-dl youtube-dlg
@@ -562,10 +445,6 @@ MimeType=video/dv;video/mpeg;video/x-mpeg;video/msvideo;video/quicktime;video/x-
 Keywords=Player;Audio;Video;
 EOM
 
-        # nodered
-        wget -c "${NODERED}" -O $R/tmp/nodered.deb
-        chroot $R gdebi -n /tmp/nodered.deb
-
         # Scratch (nuscratch)
         # - Requires: scratch wiringpi
         wget -c "${WIRINGPI}" -O $R/tmp/wiringpi.deb
@@ -573,12 +452,6 @@ EOM
         wget -c "${SCRATCH}" -O $R/tmp/scratch.deb
         chroot $R gdebi -n /tmp/scratch.deb
         chroot $R apt-get -y install nuscratch
-        rm -f $R/usr/share/applications/squeak.desktop || true
-        cat <<EOM >$R/etc/sudoers.d/scratch
-# Allow members of group gpio to execute scratch and sqweak
-%gpio ALL=NOPASSWD: /usr/bin/scratch
-%gpio ALL=NOPASSWD: /usr/bin/squeak
-EOM
 
         # Minecraft
         chroot $R apt-get -y install minecraft-pi
@@ -588,45 +461,6 @@ EOM
 
         # raspi-config - Needs forking/modifying to support Ubuntu
         #chroot $R apt-get -y install raspi-config rc-ui
-    fi
-}
-
-function tweak_flavour() {
-    if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-        # Disable compositing, by default.
-        cat <<EOM >$R/usr/share/glib-2.0/schemas/zubuntu-mate.gschema.override
-[org.mate.Marco.general]
-compositing-manager=false
-EOM
-
-        # Pre-cache MATE Menu
-        rsync -a skel/ $R/etc/skel/
-        chown -R root:root $R/etc/skel
-
-        # Purge the massive LibreOffice SVG icons.
-        cat <<'EOM' >$R/etc/rc.local
-#!/bin/sh -e
-#
-# rc.local
-#
-# This script is executed at the end of each multiuser runlevel.
-# Make sure that the script will "exit 0" on success or any other
-# value on error.
-#
-# In order to enable or disable this script just change the execution
-# bits.
-#
-# By default this script does nothing.
-
-rm -f /usr/share/icons/hicolor/scalable/apps/libreoffice-*.svg || true
-rm -f /usr/share/applications/squeak.desktop || true
-
-exit 0
-EOM
-        rm -f $R/usr/share/icons/hicolor/scalable/apps/libreoffice-*.svg || true
-        chroot $R glib-compile-schemas /usr/share/glib-2.0/schemas/
-        chroot $R update-icon-caches /usr/share/icons/hicolor/
-        chroot $R update-desktop-database
     fi
 }
 
@@ -643,10 +477,16 @@ function clean_up() {
     rm -f $R/var/crash/*
     rm -f $R/var/lib/urandom/random-seed
 
+    # SSH host keys
+    rm -f $R/etc/ssh/ssh_host_*key
+    rm -f $R/etc/ssh/ssh_host_*.pub
+
     # Clean up old Raspberry Pi firmware and modules
     rm -f $R/boot/.firmware_revision || true
     rm -rf $R/boot.bak || true
-    rm -rf $R/lib/modules/4.1.7* || true
+    # Old kernel modules
+    #rm -rf $R/lib/modules/4.1.7* || true
+    #rm -rf $R/lib/modules/4.1.13* || true
     rm -rf $R/lib/modules.bak || true
 
     # Potentially sensitive.
@@ -731,6 +571,9 @@ EOM
     rsync -a --progress "$R/" "${MOUNTDIR}/"
     umount -l "${MOUNTDIR}/boot"
     umount -l "${MOUNTDIR}"
+    fsck -y "${BOOT_LOOP}"
+    fsck -y "${ROOT_LOOP}"
+    tune2fs -c 0 -i 0 "${ROOT_LOOP}"
     losetup -d "${ROOT_LOOP}"
     losetup -d "${BOOT_LOOP}"
 }
@@ -777,7 +620,6 @@ function stage_02_desktop() {
     prepare_oem_config
     configure_ssh
     configure_network
-    add_scripts
     apt_upgrade
     apt_clean
     umount_system
@@ -791,7 +633,6 @@ function stage_03_raspi2() {
     mount_system
     configure_hardware ${FS_TYPE}
     install_software
-    tweak_flavour
     apt_upgrade
     apt_clean
     clean_up
