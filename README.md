@@ -124,7 +124,7 @@ BitBucket.
   * Updated to `omx-player` 0.3.7~git20160206~cb91001.
   * Updated to `wiringpi` 2.32.
   * Updated to `nuscratch` 20160115.
-  * Updated to `sonic-pi` 2.9.0-1.
+  * Updated to `sonic-pi` 2.9.0.
   
   * Migrated configuration tweaks to `raspberrypi-general-mods` and `raspberrypi-sys-mods`.
   
