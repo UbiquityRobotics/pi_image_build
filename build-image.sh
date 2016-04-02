@@ -39,7 +39,7 @@ fi
 function mount_system() {
     # In case this is a re-run move the cofi preload out of the way
     if [ -e $R/etc/ld.so.preload ]; then
-        mv -v $R/etc/ld.so.preload $R/etc/ld.so.preload.disable
+        mv -v $R/etc/ld.so.preload $R/etc/ld.so.preload.disabled
     fi
     mount -t proc none $R/proc
     mount -t sysfs none $R/sys
@@ -210,6 +210,10 @@ function prepare_oem_config() {
             sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-mate/' $R/usr/lib/ubiquity/plugins/ubi-usersetup.py
             sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-mate/' $R/usr/sbin/oem-config-remove-gtk
         fi
+        cp -a $R/usr/lib/oem-config/oem-config.service $R/lib/systemd/system
+        cp -a $R/usr/lib/oem-config/oem-config.target $R/lib/systemd/system
+        chroot $R /bin/systemctl enable oem-config.service
+        chroot $R /bin/systemctl enable oem-config.target
         chroot $R /bin/systemctl set-default oem-config.target
     fi
 }
@@ -302,10 +306,11 @@ function configure_hardware() {
     chroot $R apt-get -y install libraspberrypi-bin libraspberrypi-dev \
     libraspberrypi-doc libraspberrypi0 raspberrypi-bootloader rpi-update
     chroot $R apt-get -y install bluez-firmware linux-firmware linux-firmware-nonfree pi-bluetooth
+    rsync -av lib/firmware/ $R/lib/firmware/
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
         # Install X drivers
-        chroot $R apt-get -y install xserver-xorg-video-fbturbo
+        chroot $R apt-get -y install xserver-xorg-video-fbturbo xcompmgr
 
         # omxplayer
         local OMX="http://omxplayer.sconde.net/builds/omxplayer_0.3.7~git20160206~cb91001_armhf.deb"
@@ -313,11 +318,11 @@ function configure_hardware() {
         wget -c "${OMX}" -O $R/tmp/omxplayer.deb
         chroot $R gdebi -n /tmp/omxplayer.deb
 
-        # Make Ubiquity "compatible" with the Raspberry Pi 2 kernel.
+        # Make Ubiquity "compatible" with the Raspberry Pi Foundation kernel.
         if [ ${OEM_CONFIG} -eq 1 ]; then
             #sed -i 's/self\.remove_unusable_kernels()/#self\.remove_unusable_kernels()/' $R/usr/share/ubiquity/plugininstall.py
             #sed -i "s/\['linux-image-' + self.kernel_version,/\['/" $R/usr/share/ubiquity/plugininstall.py
-            cp plugininstall-pi.py $R/usr/share/ubiquity/plugininstall.py
+            cp plugininstall-${RELEASE}.py $R/usr/share/ubiquity/plugininstall.py
         fi
     fi
 
@@ -333,10 +338,10 @@ function configure_hardware() {
     fi
 
     # copies-and-fills
+    # Create /spindel_install so cofi doesn't segfault when chrooted via qemu-user-static
+    touch $R/spindle_install
     wget -c "${COFI}" -O $R/tmp/cofi.deb
     chroot $R gdebi -n /tmp/cofi.deb
-    # Disabled cofi so it doesn't segfault when building via qemu-user-static
-    mv -v $R/etc/ld.so.preload $R/etc/ld.so.preload.disable
 
     # Set up fstab
     cat <<EOM >$R/etc/fstab
@@ -368,14 +373,13 @@ function install_software() {
         chroot $R apt-get -y install python-minimal python3-minimal
         chroot $R apt-get -y install python-dev python3-dev
         chroot $R apt-get -y install python-pip python3-pip
+        chroot $R apt-get -y install python-setuptools python3-setuptools
 
         # Python extras a Raspberry Pi hacker expects to have available ;-)
         chroot $R apt-get -y install raspi-gpio
         chroot $R apt-get -y install python-rpi.gpio python3-rpi.gpio
         chroot $R apt-get -y install python-serial python3-serial
         chroot $R apt-get -y install python-spidev python3-spidev
-        chroot $R apt-get -y install python-codebug-tether python3-codebug-tether
-        chroot $R apt-get -y install python-codebug-i2c-tether python3-codebug-i2c-tether
         chroot $R apt-get -y install python-picamera python3-picamera
         chroot $R apt-get -y install python-rtimulib python3-rtimulib
         chroot $R apt-get -y install python-sense-hat python3-sense-hat
@@ -383,6 +387,8 @@ function install_software() {
         chroot $R apt-get -y install python-pil python3-pil
         chroot $R apt-get -y install python-gpiozero python3-gpiozero
         chroot $R apt-get -y install python-pygame
+        chroot $R pip2 install codebug_tether
+        chroot $R pip3 install codebug_tether
     fi
 
     if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
@@ -394,56 +400,56 @@ function install_software() {
         chroot $R apt-get -y install idle idle3
 
         # tboplayer
-        chroot $R apt-get -y install ffmpeg youtube-dl youtube-dlg
-        chroot $R apt-get -y install python-pexpect python3-pexpect
-        chroot $R apt-get -y install python-ptyprocess python3-ptyprocess
-        chroot $R apt-get -y install python-gobject-2 python-gobject
-        chroot $R apt-get -y install python-tk python3-tk
-        wget -c "${TBOPLAYER_URL}/tboplayer.py" -O $R/usr/local/bin/tboplayer.py
-        wget -c "${TBOPLAYER_URL}/yt-dl_supported_sites" -O $R/usr/local/bin/yt-dl_supported_sites
+        #chroot $R apt-get -y install ffmpeg youtube-dl youtube-dlg
+        #chroot $R apt-get -y install python-pexpect python3-pexpect
+        #chroot $R apt-get -y install python-ptyprocess python3-ptyprocess
+        #chroot $R apt-get -y install python-gobject-2 python-gobject
+        #chroot $R apt-get -y install python-tk python3-tk
+        #wget -c "${TBOPLAYER_URL}/tboplayer.py" -O $R/usr/local/bin/tboplayer.py
+        #wget -c "${TBOPLAYER_URL}/yt-dl_supported_sites" -O $R/usr/local/bin/yt-dl_supported_sites
 
         # Create a sane default tboplayer configuration
-        mkdir -p $R/etc/skel/.tboplayer
-        cat <<EOM >$R/etc/skel/.tboplayer/tboplayer.cfg
-[config]
-audio = hdmi
-subtitles = off
-mode = single
-playlists =
-tracks =
-omx_options = -b
-debug = off
-track_info =
-youtube_media_format = mp4
-omx_location = /usr/bin/omxplayer
-ytdl_location = /usr/bin/youtube-dl
-ytdl_prefered_transcoder = ffmpeg
-download_media_url_upon = play
-geometry =
-EOM
+        #mkdir -p $R/etc/skel/.tboplayer
+        #cat <<EOM >$R/etc/skel/.tboplayer/tboplayer.cfg
+#[config]
+#audio = hdmi
+#subtitles = off
+#mode = single
+#playlists =
+#tracks =
+#omx_options = -b
+#debug = off
+#track_info =
+#youtube_media_format = mp4
+#omx_location = /usr/bin/omxplayer
+#ytdl_location = /usr/bin/youtube-dl
+#ytdl_prefered_transcoder = ffmpeg
+#download_media_url_upon = play
+#geometry =
+#EOM
 
         # Create the executable
-        cat <<EOM >$R/usr/local/bin/tboplayer
+#        cat <<EOM >$R/usr/local/bin/tboplayer
 #!/bin/bash
-python2 /usr/local/bin/tboplayer.py
-EOM
-        chmod +x $R/usr/local/bin/tboplayer
+#python2 /usr/local/bin/tboplayer.py
+#EOM
+        #chmod +x $R/usr/local/bin/tboplayer
 
         # Create the .desktop entry.
-        cat <<EOM >$R/usr/share/applications/tboplayer.desktop
-[Desktop Entry]
-Version=1.0
-Name=GUI for OMXPlayer
-GenericName=Media player
-Comment=Play your multimedia streams
-Exec=tboplayer
-Icon=totem
-Terminal=false
-Type=Application
-Categories=AudioVideo;Player;
-MimeType=video/dv;video/mpeg;video/x-mpeg;video/msvideo;video/quicktime;video/x-anim;video/x-avi;video/x-ms-asf;video/x-ms-wmv;video/x-msvideo;video/x-nsv;video/x-flc;video/x-fli;video/x-flv;video/vnd.rn-realvideo;video/mp4;video/mp4v-es;video/mp2t;application/ogg;application/x-ogg;video/x-ogm+ogg;audio/x-vorbis+ogg;audio/ogg;video/ogg;application/x-matroska;audio/x-matroska;video/x-matroska;video/webm;audio/webm;audio/x-mp3;audio/x-mpeg;audio/mpeg;audio/x-wav;audio/x-mpegurl;audio/x-scpls;audio/x-m4a;audio/x-ms-asf;audio/x-ms-asx;audio/x-ms-wax;application/vnd.rn-realmedia;audio/x-real-audio;audio/x-pn-realaudio;application/x-flac;audio/x-flac;application/x-shockwave-flash;misc/ultravox;audio/vnd.rn-realaudio;audio/x-pn-aiff;audio/x-pn-au;audio/x-pn-wav;audio/x-pn-windows-acm;image/vnd.rn-realpix;audio/x-pn-realaudio-plugin;application/x-extension-mp4;audio/mp4;audio/amr;audio/amr-wb;x-content/audio-player;application/xspf+xml;x-scheme-handler/mms;x-scheme-handler/rtmp;x-scheme-handler/rtsp;
-Keywords=Player;Audio;Video;
-EOM
+#        cat <<EOM >$R/usr/share/applications/tboplayer.desktop
+#[Desktop Entry]
+#Version=1.0
+#Name=GUI for OMXPlayer
+#GenericName=Media player
+#Comment=Play your multimedia streams
+#Exec=tboplayer
+#Icon=totem
+#Terminal=false
+#Type=Application
+#Categories=AudioVideo;Player;
+#MimeType=video/dv;video/mpeg;video/x-mpeg;video/msvideo;video/quicktime;video/x-anim;video/x-avi;video/x-ms-asf;video/x-ms-wmv;video/x-msvideo;video/x-nsv;video/x-flc;video/x-fli;video/x-flv;video/vnd.rn-realvideo;video/mp4;video/mp4v-es;video/mp2t;application/ogg;application/x-ogg;video/x-ogm+ogg;audio/x-vorbis+ogg;audio/ogg;video/ogg;application/x-matroska;audio/x-matroska;video/x-matroska;video/webm;audio/webm;audio/x-mp3;audio/x-mpeg;audio/mpeg;audio/x-wav;audio/x-mpegurl;audio/x-scpls;audio/x-m4a;audio/x-ms-asf;audio/x-ms-asx;audio/x-ms-wax;application/vnd.rn-realmedia;audio/x-real-audio;audio/x-pn-realaudio;application/x-flac;audio/x-flac;application/x-shockwave-flash;misc/ultravox;audio/vnd.rn-realaudio;audio/x-pn-aiff;audio/x-pn-au;audio/x-pn-wav;audio/x-pn-windows-acm;image/vnd.rn-realpix;audio/x-pn-realaudio-plugin;application/x-extension-mp4;audio/mp4;audio/amr;audio/amr-wb;x-content/audio-player;application/xspf+xml;x-scheme-handler/mms;x-scheme-handler/rtmp;x-scheme-handler/rtsp;
+#Keywords=Player;Audio;Video;
+#EOM
 
         # Scratch (nuscratch)
         # - Requires: scratch wiringpi
@@ -454,13 +460,13 @@ EOM
         chroot $R apt-get -y install nuscratch
 
         # Minecraft
-        chroot $R apt-get -y install minecraft-pi
+        chroot $R apt-get -y install minecraft-pi python-picraft python3-picraft
 
         # Sonic Pi
-        chroot $R apt-get -y install sonic-pi
+        chroot $R apt-get -y install sonic-pi=2.9.0~repack-6
 
         # raspi-config - Needs forking/modifying to support Ubuntu
-        #chroot $R apt-get -y install raspi-config rc-ui
+        chroot $R apt-get -y install raspi-config
     fi
 }
 
@@ -502,8 +508,8 @@ function clean_up() {
     echo '' > $R/etc/machine-id
 
     # Enable cofi
-    if [ -e $R/etc/ld.so.preload.disable ]; then
-        mv -v $R/etc/ld.so.preload.disable $R/etc/ld.so.preload
+    if [ -e $R/etc/ld.so.preload.disabled ]; then
+        mv -v $R/etc/ld.so.preload.disabled $R/etc/ld.so.preload
     fi
 
     rm -rf $R/tmp/.bootstrap || true
