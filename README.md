@@ -1,19 +1,19 @@
-# Ubuntu MATE 15.10 for the Raspberry Pi  2.
+# Ubuntu MATE 16.04 for the Raspberry Pi 2 and Raspberry Pi 3.
 
 Martin Wimpress and Rohith Madhavan have made an Ubuntu MATE image
-for the Raspberry Pi 2 which you can download or build yourself.
+for the Raspberry Pi 2 and Raspberry PI 3 which you can download or
+build yourself.
 
 The image is functional and based on the regular Ubuntu `armhf` base,
 not the new Snappy Core, which means that the installation procedure for
 applications is the same as that for the regular desktop version, ie using
 `apt-get`.
 
-We have done what we can to optimise the build for the Raspberry Pi 2
+We have done what we can to optimise the build for the Raspberry Pi
 and one can comfortably use applications such as LibreOffice, which in
 fact is a joy to use :-) But the microSDHC I/O throughput is a
 bottleneck so **we recommend that you use a Class 6 or Class 10 microSDHC**
-card. If you build the image yourself we recommend you use the `f2fs`
-filesystem.
+card.
 
 You'll need a microSD card which is 4GB or greater to fit the image.
 The file system can be resized to occupy the unallocated space of the
@@ -37,11 +37,11 @@ Download the image and then:
 
   1. Extract the `.img.bz2` archive to get the image file.
 
-    bunzip2 ubuntu-mate-15.10-desktop-armhf-raspberry-pi-2.img.bz2
+    bunzip2 ubuntu-mate-16.04-desktop-armhf-raspberry-pi.img.bz2
 
   2. Write the image file to the microSD card as root.
 
-    sudo ddrescue -d -D --force ubuntu-mate-15.10-desktop-armhf-raspberry-pi-2.img /dev/sdX
+    sudo ddrescue -d -D --force ubuntu-mate-16.04-desktop-armhf-raspberry-pi.img /dev/sdX
 
 The drive may be mounted on any `/dev/sdX` so use the command `lsblk` to
 check.
@@ -115,6 +115,31 @@ BitBucket.
   * [Spindle](https://github.com/RPi-Distro/spindle) - a tool to help spin distribution images
 
 ## Changes
+
+### 2016-03-03 - 16.04 beta 1 for Raspbery Pi 2 and Raspberry Pi 3
+
+  * Updated BlueZ 5.37 with patches to support the Raspberry Pi 3 integrated Bluetooth.
+  * Updated to `raspberrypi-firmware` 1.20160315-1.
+  * Updated to `omx-player` 0.3.7~git20160206~cb91001.
+  * Updated to `wiringpi` 2.32.
+  * Updated to `nuscratch` 20160115.
+  * Updated to `sonic-pi` 2.9.0-1.
+  
+  * Migrated configuration tweaks to `raspberrypi-general-mods` and `raspberrypi-sys-mods`.
+  
+### 2016-02-27 - 15.10.3 for Raspbery Pi 2 and Raspberry Pi 3
+
+  * Added support for Raspberry Pi 3 integrated Wifi.
+  * Updated BlueZ 5.35 with patches to support the Raspberry Pi 3 integrated Bluetooth.
+  * Support for the integrated Raspberry Pi 3 Bluetooth is not working but we hope to have an update that addresses this soon.
+
+### 2016-02-26 - 15.10.2 for Raspbery Pi 2 and Raspberry Pi 3 (internal testing build)
+
+  * Added support for Raspberry Pi 3 Model B.
+  * No Raspberry Pi 3 integrated Wifi or Bluetooth support.
+  * Updated to Linux 4.1.18.
+  * Updated all packages to the current version in the Ubuntu 15.10 archive.
+  * Fixed an issue where the SSH host keys were not correctly regenerated on first boot.
 
 ### 2015-10-22 - Ubuntu MATE 15.10 for Raspbery Pi 2 Final Release
 
