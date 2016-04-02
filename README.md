@@ -119,6 +119,7 @@ BitBucket.
 ### 2016-03-03 - 16.04 beta 1 for Raspbery Pi 2 and Raspberry Pi 3
 
   * Updated BlueZ 5.37 with patches to support the Raspberry Pi 3 integrated Bluetooth.
+  * Updated to Linux 4.1.19.
   * Updated to `raspberrypi-firmware` 1.20160315-1.
   * Updated to `omx-player` 0.3.7~git20160206~cb91001.
   * Updated to `wiringpi` 2.32.

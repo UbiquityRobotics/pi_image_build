@@ -32,6 +32,7 @@ These are ported.
   * http://archive.raspberrypi.org/debian/pool/main/n/nuscratch/ (Modify wrapper in debian/scratch to just be "sudo ")
   * http://archive.raspberrypi.org/debian/pool/main/r/rtimulib/
   * http://archive.raspberrypi.org/debian/pool/main/r/raspi-config/
+  * http://archive.raspberrypi.org/debian/pool/main/r/rc-gui/
   * http://archive.raspberrypi.org/debian/pool/main/r/rpi.gpio/ (Hardcode target Python 3.x version in debian/rules)
   * http://archive.raspberrypi.org/debian/pool/main/s/spidev/
   * http://archive.raspberrypi.org/debian/pool/main/c/codebug-tether/ (Hardcode target Python 3.x in debian/rules)
@@ -49,7 +50,6 @@ These are pending.
 These FTBFS.
 
   * http://archive.raspberrypi.org/debian/pool/main/g/gst-omx1.0/
-  * http://archive.raspberrypi.org/debian/pool/main/r/rc-gui/
   * https://twolife.be/raspbian/pool/main/omxplayer/  
   * http://archive.mene.za.net/raspbian/pool/unstable/k/kodi/
   * https://twolife.be/raspbian/pool/main/kodi/
