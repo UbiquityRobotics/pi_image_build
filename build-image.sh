@@ -309,8 +309,11 @@ function configure_hardware() {
     rsync -av lib/firmware/ $R/lib/firmware/
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
-        # Install X drivers
-        chroot $R apt-get -y install xserver-xorg-video-fbturbo
+        # Install fbturbo drivers on non composited desktop OS
+        # fbturbo causes VC4 to fail
+        if [ "${FLAVOUR}" == "lubuntu" ] || [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
+            chroot $R apt-get -y install xserver-xorg-video-fbturbo
+        fi
 
         # omxplayer
         local OMX="http://omxplayer.sconde.net/builds/omxplayer_0.3.7~git20160206~cb91001_armhf.deb"
