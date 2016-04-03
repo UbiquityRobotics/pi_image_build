@@ -310,7 +310,7 @@ function configure_hardware() {
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
         # Install X drivers
-        chroot $R apt-get -y install xserver-xorg-video-fbturbo xcompmgr
+        chroot $R apt-get -y install xserver-xorg-video-fbturbo
 
         # omxplayer
         local OMX="http://omxplayer.sconde.net/builds/omxplayer_0.3.7~git20160206~cb91001_armhf.deb"
@@ -320,8 +320,6 @@ function configure_hardware() {
 
         # Make Ubiquity "compatible" with the Raspberry Pi Foundation kernel.
         if [ ${OEM_CONFIG} -eq 1 ]; then
-            #sed -i 's/self\.remove_unusable_kernels()/#self\.remove_unusable_kernels()/' $R/usr/share/ubiquity/plugininstall.py
-            #sed -i "s/\['linux-image-' + self.kernel_version,/\['/" $R/usr/share/ubiquity/plugininstall.py
             cp plugininstall-${RELEASE}.py $R/usr/share/ubiquity/plugininstall.py
         fi
     fi
@@ -356,7 +354,8 @@ EOM
     else
         echo "dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash" > $R/boot/cmdline.txt
         sed -i 's/#framebuffer_depth=16/framebuffer_depth=32/' $R/boot/config.txt
-        sed -i 's/#framebuffer_ignore_alpha=0/framebuffer_ignore_alpha=1/' $R/boot/config.txt
+        #sed -i 's/#framebuffer_ignore_alpha=0/framebuffer_ignore_alpha=1/' $R/boot/config.txt
+        sed -i 's/#dtparam=audio=off/dtparam=audio=on/' $R/boot/config.txt
     fi
 
     # Save the clock
@@ -394,62 +393,67 @@ function install_software() {
     if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
         # Install the Minecraft PPA
         chroot $R apt-add-repository -y ppa:flexiondotorg/minecraft
+        chroot $R apt-add-repository -y ppa:ubuntu-mate-dev/welcome
         chroot $R apt-get update
 
         # Python IDLE
         chroot $R apt-get -y install idle idle3
 
+        # YouTube DL
+        chroot $R apt-get -y install ffmpeg rtmpdump
+        chroot $R apt-get -y --no-install-recommends install ffmpeg youtube-dl
+        chroot $R apt-get -y install youtube-dlg
+
         # tboplayer
-        #chroot $R apt-get -y install ffmpeg youtube-dl youtube-dlg
-        #chroot $R apt-get -y install python-pexpect python3-pexpect
-        #chroot $R apt-get -y install python-ptyprocess python3-ptyprocess
-        #chroot $R apt-get -y install python-gobject-2 python-gobject
-        #chroot $R apt-get -y install python-tk python3-tk
-        #wget -c "${TBOPLAYER_URL}/tboplayer.py" -O $R/usr/local/bin/tboplayer.py
-        #wget -c "${TBOPLAYER_URL}/yt-dl_supported_sites" -O $R/usr/local/bin/yt-dl_supported_sites
+        chroot $R apt-get -y install python-pexpect python3-pexpect
+        chroot $R apt-get -y install python-ptyprocess python3-ptyprocess
+        chroot $R apt-get -y install python-gobject-2 python-gobject
+        chroot $R apt-get -y install python-tk python3-tk
+        wget -c "${TBOPLAYER_URL}/tboplayer.py" -O $R/usr/local/bin/tboplayer.py
+        wget -c "${TBOPLAYER_URL}/yt-dl_supported_sites" -O $R/usr/local/bin/yt-dl_supported_sites
 
         # Create a sane default tboplayer configuration
-        #mkdir -p $R/etc/skel/.tboplayer
-        #cat <<EOM >$R/etc/skel/.tboplayer/tboplayer.cfg
-#[config]
-#audio = hdmi
-#subtitles = off
-#mode = single
-#playlists =
-#tracks =
-#omx_options = -b
-#debug = off
-#track_info =
-#youtube_media_format = mp4
-#omx_location = /usr/bin/omxplayer
-#ytdl_location = /usr/bin/youtube-dl
-#ytdl_prefered_transcoder = ffmpeg
-#download_media_url_upon = play
-#geometry =
-#EOM
+        mkdir -p $R/etc/skel/.tboplayer
+        cat <<EOM >$R/etc/skel/.tboplayer/tboplayer.cfg
+[config]
+audio = hdmi
+subtitles = off
+mode = single
+playlists =
+tracks =
+omx_options = -b
+debug = off
+track_info =
+youtube_media_format = mp4
+omx_location = /usr/bin/omxplayer
+ytdl_location = /usr/bin/youtube-dl
+ytdl_prefered_transcoder = ffmpeg
+download_media_url_upon = play
+geometry =
+EOM
 
         # Create the executable
-#        cat <<EOM >$R/usr/local/bin/tboplayer
+        cat <<EOM >$R/usr/local/bin/tboplayer
 #!/bin/bash
-#python2 /usr/local/bin/tboplayer.py
-#EOM
-        #chmod +x $R/usr/local/bin/tboplayer
+python2 /usr/local/bin/tboplayer.py
+EOM
+        chmod +x $R/usr/local/bin/tboplayer
 
         # Create the .desktop entry.
-#        cat <<EOM >$R/usr/share/applications/tboplayer.desktop
-#[Desktop Entry]
-#Version=1.0
-#Name=GUI for OMXPlayer
-#GenericName=Media player
-#Comment=Play your multimedia streams
-#Exec=tboplayer
-#Icon=totem
-#Terminal=false
-#Type=Application
-#Categories=AudioVideo;Player;
-#MimeType=video/dv;video/mpeg;video/x-mpeg;video/msvideo;video/quicktime;video/x-anim;video/x-avi;video/x-ms-asf;video/x-ms-wmv;video/x-msvideo;video/x-nsv;video/x-flc;video/x-fli;video/x-flv;video/vnd.rn-realvideo;video/mp4;video/mp4v-es;video/mp2t;application/ogg;application/x-ogg;video/x-ogm+ogg;audio/x-vorbis+ogg;audio/ogg;video/ogg;application/x-matroska;audio/x-matroska;video/x-matroska;video/webm;audio/webm;audio/x-mp3;audio/x-mpeg;audio/mpeg;audio/x-wav;audio/x-mpegurl;audio/x-scpls;audio/x-m4a;audio/x-ms-asf;audio/x-ms-asx;audio/x-ms-wax;application/vnd.rn-realmedia;audio/x-real-audio;audio/x-pn-realaudio;application/x-flac;audio/x-flac;application/x-shockwave-flash;misc/ultravox;audio/vnd.rn-realaudio;audio/x-pn-aiff;audio/x-pn-au;audio/x-pn-wav;audio/x-pn-windows-acm;image/vnd.rn-realpix;audio/x-pn-realaudio-plugin;application/x-extension-mp4;audio/mp4;audio/amr;audio/amr-wb;x-content/audio-player;application/xspf+xml;x-scheme-handler/mms;x-scheme-handler/rtmp;x-scheme-handler/rtsp;
-#Keywords=Player;Audio;Video;
-#EOM
+        cat <<EOM >$R/usr/share/applications/tboplayer.desktop
+[Desktop Entry]
+Version=1.0
+Name=GUI for OMXPlayer
+GenericName=Media player
+Comment=Play your multimedia streams
+Exec=tboplayer
+Icon=totem
+Terminal=false
+Type=Application
+Categories=AudioVideo;Player;
+MimeType=video/dv;video/mpeg;video/x-mpeg;video/msvideo;video/quicktime;video/x-anim;video/x-avi;video/x-ms-asf;video/x-ms-wmv;video/x-msvideo;video/x-nsv;video/x-flc;video/x-fli;video/x-flv;video/vnd.rn-realvideo;video/mp4;video/mp4v-es;video/mp2t;application/ogg;application/x-ogg;video/x-ogm+ogg;audio/x-vorbis+ogg;audio/ogg;video/ogg;application/x-matroska;audio/x-matroska;video/x-matroska;video/webm;audio/webm;audio/x-mp3;audio/x-mpeg;audio/mpeg;audio/x-wav;audio/x-mpegurl;audio/x-scpls;audio/x-m4a;audio/x-ms-asf;audio/x-ms-asx;audio/x-ms-wax;application/vnd.rn-realmedia;audio/x-real-audio;audio/x-pn-realaudio;application/x-flac;audio/x-flac;application/x-shockwave-flash;misc/ultravox;audio/vnd.rn-realaudio;audio/x-pn-aiff;audio/x-pn-au;audio/x-pn-wav;audio/x-pn-windows-acm;image/vnd.rn-realpix;audio/x-pn-realaudio-plugin;application/x-extension-mp4;audio/mp4;audio/amr;audio/amr-wb;x-content/audio-player;application/xspf+xml;x-scheme-handler/mms;x-scheme-handler/rtmp;x-scheme-handler/rtsp;
+Keywords=Player;Audio;Video;
+EOM
 
         # Scratch (nuscratch)
         # - Requires: scratch wiringpi
@@ -466,7 +470,7 @@ function install_software() {
         chroot $R apt-get -y install sonic-pi=2.9.0~repack-6
 
         # raspi-config - Needs forking/modifying to support Ubuntu
-        chroot $R apt-get -y install raspi-config
+        # chroot $R apt-get -y install raspi-config
     fi
 }
 
@@ -483,6 +487,14 @@ function clean_up() {
     rm -f $R/var/crash/*
     rm -f $R/var/lib/urandom/random-seed
 
+    # Build cruft
+    rm -f $R/var/cache/debconf/*-old || true
+    rm -f $R/var/lib/dpkg/*-old || true
+    rm -f $R/var/lib/apt/lists/* || true
+    rm -f $R/var/cache/bootstrap.log || true
+    truncate -s 0 $R/var/log/lastlog || true
+    truncate -s 0 $R/var/log/faillog || true
+
     # SSH host keys
     rm -f $R/etc/ssh/ssh_host_*key
     rm -f $R/etc/ssh/ssh_host_*.pub
@@ -490,14 +502,16 @@ function clean_up() {
     # Clean up old Raspberry Pi firmware and modules
     rm -f $R/boot/.firmware_revision || true
     rm -rf $R/boot.bak || true
-    # Old kernel modules
-    #rm -rf $R/lib/modules/4.1.7* || true
-    #rm -rf $R/lib/modules/4.1.13* || true
     rm -rf $R/lib/modules.bak || true
+    # Old kernel modules
+    #rm -rf $R/lib/modules/4.1.19* || true
 
     # Potentially sensitive.
     rm -f $R/root/.bash_history
     rm -f $R/root/.ssh/known_hosts
+
+    # Remove bogus home directory
+    rm -rf $R/home/${SUDO_USER} || true
 
     # Machine-specific, so remove in case this system is going to be
     # cloned.  These will be regenerated on the first boot.
