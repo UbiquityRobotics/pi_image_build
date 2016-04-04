@@ -359,6 +359,11 @@ EOM
         sed -i 's/#framebuffer_depth=16/framebuffer_depth=32/' $R/boot/config.txt
         #sed -i 's/#framebuffer_ignore_alpha=0/framebuffer_ignore_alpha=1/' $R/boot/config.txt
         sed -i 's/#dtparam=audio=off/dtparam=audio=on/' $R/boot/config.txt
+
+        # Enable VC4 on composited desktops
+        if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
+            echo "dtoverlay=vc4-kms-v3d" > $R/boot/config.txt
+        fi
     fi
 
     # Save the clock
