@@ -55,10 +55,10 @@ function publish_image() {
             xz ${BASEDIR}/${IMAGE}
         fi
         make_hash "${BASEDIR}/${IMAGE}.xz" ${HASH}
+        ssh ${DEST} mkdir -p ~/ISO-Mirror/${RELEASE}/armhf/
         rsync -rvl -e 'ssh -c aes128-gcm@openssh.com' --progress "${BASEDIR}/${IMAGE}.xz" ${DEST}:ISO-Mirror/${RELEASE}/armhf/
         rsync -rvl -e 'ssh -c aes128-gcm@openssh.com' --progress "${BASEDIR}/${IMAGE}.xz.${HASH}" ${DEST}:ISO-Mirror/${RELEASE}/armhf/
         rsync -rvl -e 'ssh -c aes128-gcm@openssh.com' --progress "${BASEDIR}/${IMAGE}.xz.${HASH}.sign" ${DEST}:ISO-Mirror/${RELEASE}/armhf/
-
     fi
 }
 
