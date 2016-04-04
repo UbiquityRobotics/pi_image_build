@@ -19,8 +19,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ########################################################################
 
-FLAVOUR="ubuntu-mate"
-FLAVOUR_NAME="Ubuntu MATE"
+FLAVOUR="ubuntu"
+FLAVOUR_NAME="Ubuntu"
 RELEASE="xenial"
 VERSION="16.04"
 QUALITY="-beta2"
