@@ -204,7 +204,9 @@ function prepare_oem_config() {
             chroot $R apt-get -y install --no-install-recommends oem-config-gtk ubiquity-frontend-gtk ubiquity-ubuntu-artwork
         fi
 
-        if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
+        if [ "${FLAVOUR}" == "ubuntu" ]; then
+            chroot $R apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu
+        elif [ "${FLAVOUR}" == "ubuntu-mate" ]; then
             chroot $R apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu-mate
             # Force the slideshow to use Ubuntu MATE artwork.
             sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-mate/' $R/usr/lib/ubiquity/plugins/ubi-usersetup.py
@@ -293,6 +295,8 @@ function configure_hardware() {
         echo "ERROR! Unsupport filesystem requested. Exitting."
         exit 1
     fi
+
+    chroot $R apt-get -y update
 
     # gdebi-core used for installing copies-and-fills and omxplayer
     chroot $R apt-get -y install gdebi-core
