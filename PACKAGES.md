@@ -58,6 +58,3 @@ Kodi builds are currently a work in progress, these are the references:
 
   * http://archive.mene.za.net/raspbian/pool/unstable/k/kodi/
   * https://twolife.be/raspbian/pool/main/kodi/
-  
-
-
