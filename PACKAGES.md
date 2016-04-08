@@ -58,3 +58,33 @@ Kodi builds are currently a work in progress, these are the references:
 
   * http://archive.mene.za.net/raspbian/pool/unstable/k/kodi/
   * https://twolife.be/raspbian/pool/main/kodi/
+
+The build is based on https://twolife.be/raspbian/pool/main/kodi/
+with some additions taken from http://archive.mene.za.net/raspbian/pool/unstable/k/kodi/.
+
+Unrecognized options:
+
+  * --disable-maintainer-mode
+  * --disable-sdl
+  * --disable-projectm
+  * --disable-rsxs
+  * --disable-goom
+
+Some options that might be worth testing:
+
+  * --disable-xrandr
+  * --disable-joystick
+  * --enable-airplay
+  * --enable-mid
+  * --enable-rsxs 
+  * --enable-afpclient
+  * --enable-non-free
+  * --enable-dvdcss
+  * --enable-ccache
+  * --enable-alsa
+  * --enable-libusb
+  * --enable-libbluray
+  * --enable-optical-drive
+  * --enable-dvdcss
+
+Probably need to ship ~/.ffmpeg that sets mmal as the default.
