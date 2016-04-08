@@ -66,23 +66,23 @@ Unrecognized options:
 
   * --disable-maintainer-mode
   * --disable-sdl
-  * --disable-projectm
-  * --disable-rsxs
-  * --disable-goom
+  * --disable-projectm  Music visualisations
+  * --disable-rsxs      Disables screensavers
+  * --disable-goom      Audio visualisation
 
 Some options that might be worth testing:
 
   * --disable-xrandr
   * --disable-joystick
-  * --enable-airplay
-  * --enable-mid
-  * --enable-rsxs 
+  * --enable-airplay    B-D libshairplay AirTunes
+  * --enable-mid        Option to enable MID Moblin support at compile time. Sets vsync disabled as default and sets the goom texture and thumb size to 256.
+  * --enable-rsxs       Appears to enable screensavers. 
   * --enable-afpclient
   * --enable-non-free
-  * --enable-dvdcss
-  * --enable-ccache
-  * --enable-alsa
-  * --enable-libusb
+  * --enable-dvdcss     Enable encrpyted DVD playback
+  * --enable-ccache     B-D ccache
+  * --enable-alsa       ALSA support is built with the current configuration
+  * --enable-libusb     B-D libusb
   * --enable-libbluray
   * --enable-optical-drive
   * --enable-dvdcss
