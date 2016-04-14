@@ -116,6 +116,13 @@ BitBucket.
 
 ## Changes
 
+### 2016-04-14 - 16.04 Release Candidate for Raspberry Pi 2 and Raspberry Pi 3
+
+  * Updated VLC so it is now built with OpenMAX video acceleration for the Raspberry Pi.
+  * Updated ffmpeg so it is now built with MMAL video acceleration for the Raspberry Pi.
+  * Removed tboplayer.
+  * Fixed incorrect permissions of `/lib/firmware/brcm`
+
 ### 2016-03-03 - 16.04 beta 1 for Raspbery Pi 2 and Raspberry Pi 3
 
   * Updated BlueZ 5.37 with patches to support the Raspberry Pi 3 integrated Bluetooth.
@@ -125,7 +132,6 @@ BitBucket.
   * Updated to `wiringpi` 2.32.
   * Updated to `nuscratch` 20160115.
   * Updated to `sonic-pi` 2.9.0.
-  
   * Migrated configuration tweaks to `raspberrypi-general-mods` and `raspberrypi-sys-mods`.
   
 ### 2016-02-27 - 15.10.3 for Raspbery Pi 2 and Raspberry Pi 3
