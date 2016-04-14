@@ -310,7 +310,11 @@ function configure_hardware() {
     chroot $R apt-get -y install libraspberrypi-bin libraspberrypi-dev \
     libraspberrypi-doc libraspberrypi0 raspberrypi-bootloader rpi-update
     chroot $R apt-get -y install bluez-firmware linux-firmware linux-firmware-nonfree pi-bluetooth
-    rsync -av lib/firmware/ $R/lib/firmware/
+
+    # Package this?
+    chroot $R mkdir -p /lib/firmware/brcm
+    cp /lib/firmware/brcm/brcmfmac43430-sdio.* /lib/firmware/brcm/
+    chown root:root /lib/firmware/brcm/brcmfmac43430-sdio.*
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
         # Install fbturbo drivers on non composited desktop OS
@@ -377,7 +381,6 @@ EOM
 function install_software() {
     local SCRATCH="http://archive.raspberrypi.org/debian/pool/main/s/scratch/scratch_1.4.20131203-2_all.deb"
     local WIRINGPI="http://archive.raspberrypi.org/debian/pool/main/w/wiringpi/wiringpi_2.32_armhf.deb"
-    local TBOPLAYER_URL="https://raw.githubusercontent.com/KenT2/tboplayer/master/"
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ]; then
         # Python
@@ -416,57 +419,6 @@ function install_software() {
         chroot $R apt-get -y --no-install-recommends install ffmpeg youtube-dl
         chroot $R apt-get -y install youtube-dlg
 
-        # tboplayer
-        chroot $R apt-get -y install python-pexpect python3-pexpect
-        chroot $R apt-get -y install python-ptyprocess python3-ptyprocess
-        chroot $R apt-get -y install python-gobject-2 python-gobject
-        chroot $R apt-get -y install python-tk python3-tk
-        wget -c "${TBOPLAYER_URL}/tboplayer.py" -O $R/usr/local/bin/tboplayer.py
-        wget -c "${TBOPLAYER_URL}/yt-dl_supported_sites" -O $R/usr/local/bin/yt-dl_supported_sites
-
-        # Create a sane default tboplayer configuration
-        mkdir -p $R/etc/skel/.tboplayer
-        cat <<EOM >$R/etc/skel/.tboplayer/tboplayer.cfg
-[config]
-audio = hdmi
-subtitles = off
-mode = single
-playlists =
-tracks =
-omx_options = -b
-debug = off
-track_info =
-youtube_media_format = mp4
-omx_location = /usr/bin/omxplayer
-ytdl_location = /usr/bin/youtube-dl
-ytdl_prefered_transcoder = ffmpeg
-download_media_url_upon = play
-geometry =
-EOM
-
-        # Create the executable
-        cat <<EOM >$R/usr/local/bin/tboplayer
-#!/bin/bash
-python2 /usr/local/bin/tboplayer.py
-EOM
-        chmod +x $R/usr/local/bin/tboplayer
-
-        # Create the .desktop entry.
-        cat <<EOM >$R/usr/share/applications/tboplayer.desktop
-[Desktop Entry]
-Version=1.0
-Name=GUI for OMXPlayer
-GenericName=Media player
-Comment=Play your multimedia streams
-Exec=tboplayer
-Icon=totem
-Terminal=false
-Type=Application
-Categories=AudioVideo;Player;
-MimeType=video/dv;video/mpeg;video/x-mpeg;video/msvideo;video/quicktime;video/x-anim;video/x-avi;video/x-ms-asf;video/x-ms-wmv;video/x-msvideo;video/x-nsv;video/x-flc;video/x-fli;video/x-flv;video/vnd.rn-realvideo;video/mp4;video/mp4v-es;video/mp2t;application/ogg;application/x-ogg;video/x-ogm+ogg;audio/x-vorbis+ogg;audio/ogg;video/ogg;application/x-matroska;audio/x-matroska;video/x-matroska;video/webm;audio/webm;audio/x-mp3;audio/x-mpeg;audio/mpeg;audio/x-wav;audio/x-mpegurl;audio/x-scpls;audio/x-m4a;audio/x-ms-asf;audio/x-ms-asx;audio/x-ms-wax;application/vnd.rn-realmedia;audio/x-real-audio;audio/x-pn-realaudio;application/x-flac;audio/x-flac;application/x-shockwave-flash;misc/ultravox;audio/vnd.rn-realaudio;audio/x-pn-aiff;audio/x-pn-au;audio/x-pn-wav;audio/x-pn-windows-acm;image/vnd.rn-realpix;audio/x-pn-realaudio-plugin;application/x-extension-mp4;audio/mp4;audio/amr;audio/amr-wb;x-content/audio-player;application/xspf+xml;x-scheme-handler/mms;x-scheme-handler/rtmp;x-scheme-handler/rtsp;
-Keywords=Player;Audio;Video;
-EOM
-
         # Scratch (nuscratch)
         # - Requires: scratch wiringpi
         wget -c "${WIRINGPI}" -O $R/tmp/wiringpi.deb
@@ -502,7 +454,6 @@ function clean_up() {
     # Build cruft
     rm -f $R/var/cache/debconf/*-old || true
     rm -f $R/var/lib/dpkg/*-old || true
-    rm -f $R/var/lib/apt/lists/* || true
     rm -f $R/var/cache/bootstrap.log || true
     truncate -s 0 $R/var/log/lastlog || true
     truncate -s 0 $R/var/log/faillog || true
