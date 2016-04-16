@@ -311,10 +311,9 @@ function configure_hardware() {
     libraspberrypi-doc libraspberrypi0 raspberrypi-bootloader rpi-update
     chroot $R apt-get -y install bluez-firmware linux-firmware linux-firmware-nonfree pi-bluetooth
 
-    # Package this?
-    chroot $R mkdir -p /lib/firmware/brcm
-    cp lib/firmware/brcm/brcmfmac43430-sdio.* $R/lib/firmware/brcm/
-    chown root:root $R/lib/firmware/brcm/brcmfmac43430-sdio.*
+    # Raspberry Pi 3 WiFi firmware. Package this?
+    cp firmware/* $R/lib/firmware/brcm/
+    chown root:root $R/lib/firmware/brcm/*
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
         # Install fbturbo drivers on non composited desktop OS
