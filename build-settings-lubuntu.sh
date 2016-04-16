@@ -23,7 +23,7 @@ FLAVOUR="lubuntu"
 FLAVOUR_NAME="Lubuntu"
 RELEASE="xenial"
 VERSION="16.04"
-QUALITY="-beta2"
+QUALITY="-rc"
 
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"

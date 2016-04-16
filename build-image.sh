@@ -313,8 +313,8 @@ function configure_hardware() {
 
     # Package this?
     chroot $R mkdir -p /lib/firmware/brcm
-    cp /lib/firmware/brcm/brcmfmac43430-sdio.* /lib/firmware/brcm/
-    chown root:root /lib/firmware/brcm/brcmfmac43430-sdio.*
+    cp lib/firmware/brcm/brcmfmac43430-sdio.* $R/lib/firmware/brcm/
+    chown root:root $R/lib/firmware/brcm/brcmfmac43430-sdio.*
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
         # Install fbturbo drivers on non composited desktop OS

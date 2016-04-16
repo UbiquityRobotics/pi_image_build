@@ -23,13 +23,13 @@ FLAVOUR="ubuntu-mate"
 FLAVOUR_NAME="Ubuntu MATE"
 RELEASE="xenial"
 VERSION="16.04"
-QUALITY="-beta2"
+QUALITY="-rc"
 
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"
 
 # Either 4, 8 or 16
-FS_SIZE=4
+FS_SIZE=8
 
 # Either 0 or 1.
 # - 0 don't make generic rootfs tarball
