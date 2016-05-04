@@ -23,7 +23,7 @@ FLAVOUR="kubuntu"
 FLAVOUR_NAME="Kubuntu"
 RELEASE="xenial"
 VERSION="16.04"
-QUALITY="-rc"
+QUALITY=""
 
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"

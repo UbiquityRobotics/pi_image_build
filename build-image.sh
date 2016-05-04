@@ -309,10 +309,10 @@ function configure_hardware() {
     # Firmware Kernel installation
     chroot $R apt-get -y install libraspberrypi-bin libraspberrypi-dev \
     libraspberrypi-doc libraspberrypi0 raspberrypi-bootloader rpi-update
-    chroot $R apt-get -y install bluez-firmware linux-firmware linux-firmware-nonfree pi-bluetooth
+    chroot $R apt-get -y install bluez-firmware linux-firmware pi-bluetooth
 
     # Raspberry Pi 3 WiFi firmware. Package this?
-    cp firmware/* $R/lib/firmware/brcm/
+    cp -v firmware/* $R/lib/firmware/brcm/
     chown root:root $R/lib/firmware/brcm/*
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
@@ -622,6 +622,19 @@ function stage_03_raspi2() {
     make_raspi2_image ${FS_TYPE} ${FS_SIZE}
 }
 
+function stage_04_corrections() {
+    R=${DEVICE_R}
+    mount_system
+
+    #Insert corrections here.
+
+    apt_clean
+    clean_up
+    umount_system
+    make_raspi2_image ${FS_TYPE} ${FS_SIZE}
+}
+
 stage_01_base
 stage_02_desktop
 stage_03_raspi2
+#stage_04_corrections

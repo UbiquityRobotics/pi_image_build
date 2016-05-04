@@ -19,47 +19,15 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ########################################################################
 
-FLAVOUR="ubuntu"
-FLAVOUR_NAME="Ubuntu"
-RELEASE="xenial"
-VERSION="16.04"
-QUALITY=""
-
-# Either 'ext4' or 'f2fs'
-FS_TYPE="ext4"
-
-# Either 4, 8 or 16
-FS_SIZE=4
-
-# Either 0 or 1.
-# - 0 don't make generic rootfs tarball
-# - 1 make a generic rootfs tarball
-MAKE_TARBALL=1
-
-TARBALL="${FLAVOUR}-${VERSION}${QUALITY}-desktop-armhf-rootfs.tar.bz2"
-IMAGE="${FLAVOUR}-${VERSION}${QUALITY}-desktop-armhf-raspberry-pi.img"
-BASEDIR=${HOME}/PiFlavourMaker/${RELEASE}
-BUILDDIR=${BASEDIR}/${FLAVOUR}
-BASE_R=${BASEDIR}/base
-DESKTOP_R=${BUILDDIR}/desktop
-DEVICE_R=${BUILDDIR}/pi
-ARCH=$(uname -m)
-export TZ=UTC
-
-
-if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
-    USERNAME="ubuntu"
-    OEM_CONFIG=0
-else
-    USERNAME="${FLAVOUR}"
-    OEM_CONFIG=1
+if [ $(id -u) -ne 0 ]; then
+    echo "ERROR! Must be root."
+    exit 1
 fi
 
-# Override OEM_CONFIG here if required. Either 0 or 1.
-# - 0 to hardcode a user.
-# - 1 to use oem-config.
-#OEM_CONFIG=1
-
-if [ ${OEM_CONFIG} -eq 1 ]; then
-    USERNAME="oem"
-fi
+for FLAVOUR in ubuntu-minimal ubuntu-standard lubuntu xubuntu ubuntu-mate; do
+    echo "Building ${FLAVOUR}"
+    ./link-settings.sh "${FLAVOUR}"
+    ./build-image.sh
+    ./build-umount.sh
+    ./build-umount.sh
+done
