@@ -22,7 +22,7 @@
 FLAVOUR="ubuntu"
 FLAVOUR_NAME="Ubuntu"
 RELEASE="xenial"
-VERSION="16.04"
+VERSION="16.04.1"
 QUALITY=""
 
 # Either 'ext4' or 'f2fs'
@@ -58,7 +58,7 @@ fi
 # Override OEM_CONFIG here if required. Either 0 or 1.
 # - 0 to hardcode a user.
 # - 1 to use oem-config.
-#OEM_CONFIG=1
+OEM_CONFIG=0
 
 if [ ${OEM_CONFIG} -eq 1 ]; then
     USERNAME="oem"
