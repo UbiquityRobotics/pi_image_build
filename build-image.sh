@@ -304,16 +304,13 @@ function configure_hardware() {
 
     # Install the RPi PPA
     chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
+    chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/crazy-pi
     chroot $R apt-get update
 
     # Firmware Kernel installation
     chroot $R apt-get -y install libraspberrypi-bin libraspberrypi-dev \
     libraspberrypi-doc libraspberrypi0 raspberrypi-bootloader rpi-update
-    chroot $R apt-get -y install bluez-firmware linux-firmware pi-bluetooth
-
-    # Raspberry Pi 3 WiFi firmware. Package this?
-    cp -v firmware/* $R/lib/firmware/brcm/
-    chown root:root $R/lib/firmware/brcm/*
+    chroot $R apt-get -y install bluez-firmware firmware-brcm80211 linux-firmware pi-bluetooth
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
         # Install fbturbo drivers on non composited desktop OS
@@ -323,7 +320,7 @@ function configure_hardware() {
         fi
 
         # omxplayer
-        local OMX="http://omxplayer.sconde.net/builds/omxplayer_0.3.7~git20160206~cb91001_armhf.deb"
+        local OMX="http://omxplayer.sconde.net/builds/omxplayer_0.3.7~git20160923~dfea8c9_armhf.deb"
         # - Requires: libpcre3 libfreetype6 fonts-freefont-ttf dbus libssl1.0.0 libsmbclient libssh-4
         wget -c "${OMX}" -O $R/tmp/omxplayer.deb
         chroot $R gdebi -n /tmp/omxplayer.deb
@@ -359,17 +356,74 @@ proc            /proc           proc    defaults          0       0
 EOM
 
     # Set up firmware config
+    cat <<EOM >$R/boot/config.txt
+# For more options and information see
+# http://www.raspberrypi.org/documentation/configuration/config-txt.md
+# Some settings may impact device functionality. See link above for details
+
+# uncomment if you get no picture on HDMI for a default "safe" mode
+#hdmi_safe=1
+
+# uncomment this if your display has a black border of unused pixels visible
+# and your display can output without overscan
+#disable_overscan=1
+
+# uncomment the following to adjust overscan. Use positive numbers if console
+# goes off screen, and negative if there is too much border
+#overscan_left=16
+#overscan_right=16
+#overscan_top=16
+#overscan_bottom=16
+
+# uncomment to force a console size. By default it will be display's size minus
+# overscan.
+#framebuffer_width=1280
+#framebuffer_height=720
+
+# uncomment if hdmi display is not detected and composite is being output
+#hdmi_force_hotplug=1
+
+# uncomment to force a specific HDMI mode (this will force VGA)
+#hdmi_group=1
+#hdmi_mode=1
+
+# uncomment to force a HDMI mode rather than DVI. This can make audio work in
+# DMT (computer monitor) modes
+#hdmi_drive=2
+
+# uncomment to increase signal to HDMI, if you have interference, blanking, or
+# no display
+#config_hdmi_boost=4
+
+# uncomment for composite PAL
+#sdtv_mode=2
+
+#uncomment to overclock the arm. 700 MHz is the default.
+#arm_freq=800
+
+# Uncomment some or all of these to enable the optional hardware interfaces
+#dtparam=i2c_arm=on
+#dtparam=i2s=on
+#dtparam=spi=on
+
+# Uncomment this to enable the lirc-rpi module
+#dtoverlay=lirc-rpi
+
+# Additional overlays and parameters are documented /boot/overlays/README
+
+# Enable audio (loads snd_bcm2835)
+dtparam=audio=on
+EOM
+
     if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
-        echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash" > $R/boot/cmdline.txt
+        echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash" > $R/boot/cmdline.txt
     else
-        echo "dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash" > $R/boot/cmdline.txt
-        sed -i 's/#framebuffer_depth=16/framebuffer_depth=32/' $R/boot/config.txt
-        #sed -i 's/#framebuffer_ignore_alpha=0/framebuffer_ignore_alpha=1/' $R/boot/config.txt
-        sed -i 's/#dtparam=audio=off/dtparam=audio=on/' $R/boot/config.txt
+        echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash" > $R/boot/cmdline.txt
+        #sed -i 's/#framebuffer_depth=16/framebuffer_depth=32/' $R/boot/config.txt
 
         # Enable VC4 on composited desktops
         if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
-            echo "dtoverlay=vc4-kms-v3d" > $R/boot/config.txt
+            echo "dtoverlay=vc4-kms-v3d" >> $R/boot/config.txt
         fi
     fi
 
@@ -379,7 +433,6 @@ EOM
 
 function install_software() {
     local SCRATCH="http://archive.raspberrypi.org/debian/pool/main/s/scratch/scratch_1.4.20131203-2_all.deb"
-    local WIRINGPI="http://archive.raspberrypi.org/debian/pool/main/w/wiringpi/wiringpi_2.32_armhf.deb"
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ]; then
         # Python
@@ -391,6 +444,7 @@ function install_software() {
         # Python extras a Raspberry Pi hacker expects to have available ;-)
         chroot $R apt-get -y install raspi-gpio
         chroot $R apt-get -y install python-rpi.gpio python3-rpi.gpio
+        chroot $R apt-get -y install pigpio python-pigpio python3-pigpio
         chroot $R apt-get -y install python-serial python3-serial
         chroot $R apt-get -y install python-spidev python3-spidev
         chroot $R apt-get -y install python-picamera python3-picamera
@@ -419,9 +473,7 @@ function install_software() {
         chroot $R apt-get -y install youtube-dlg
 
         # Scratch (nuscratch)
-        # - Requires: scratch wiringpi
-        wget -c "${WIRINGPI}" -O $R/tmp/wiringpi.deb
-        chroot $R gdebi -n /tmp/wiringpi.deb
+        # - Requires: scratch
         wget -c "${SCRATCH}" -O $R/tmp/scratch.deb
         chroot $R gdebi -n /tmp/scratch.deb
         chroot $R apt-get -y install nuscratch
@@ -637,4 +689,4 @@ function stage_04_corrections() {
 stage_01_base
 stage_02_desktop
 stage_03_raspi2
-#stage_04_corrections
+stage_04_corrections
