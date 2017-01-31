@@ -8,6 +8,7 @@ These rough notes keep track of what Raspberry Pi packages have been
 These are ported.
 
   * http://archive.raspberrypi.org/debian/pool/main/r/raspberrypi-firmware/
+  * https://archive.raspberrypi.org/debian/pool/main/f/firmware-nonfree/
   * https://launchpad.net/~fo0bar/+archive/ubuntu/rpi2-nightly/+files/
 
 These are pending.
@@ -25,7 +26,7 @@ These are for reference.
 
 These are ported.
 
-  * https://archive.raspberrypi.org/debian/pool/main/m/minecraft-pi/
+  * http://archive.raspberrypi.org/debian/pool/main/m/minecraft-pi/
   * http://archive.raspberrypi.org/debian/pool/main/r/raspi-gpio/
   * http://archive.raspberrypi.org/debian/pool/main/s/sonic-pi/
   * http://archive.raspberrypi.org/debian/pool/main/p/picamera/
@@ -33,24 +34,36 @@ These are ported.
   * http://archive.raspberrypi.org/debian/pool/main/r/rtimulib/
   * http://archive.raspberrypi.org/debian/pool/main/r/raspi-config/
   * http://archive.raspberrypi.org/debian/pool/main/r/rc-gui/
-  * http://archive.raspberrypi.org/debian/pool/main/r/rpi.gpio/ (Hardcode target Python 3.x version in debian/rules)
+  * http://archive.raspberrypi.org/debian/pool/main/r/rpi.gpio/ (debian/control Just python3 and python3-dev. debian/rules only python2.7 and python3.5)
   * http://archive.raspberrypi.org/debian/pool/main/s/spidev/
-  * http://archive.raspberrypi.org/debian/pool/main/c/codebug-tether/ (Hardcode target Python 3.x in debian/rules)
+  * http://archive.raspberrypi.org/debian/pool/main/c/codebug-tether/
   * http://archive.raspberrypi.org/debian/pool/main/c/codebug-i2c-tether/ (Hardcode target Python 3.x in debian/rules)
   * http://archive.raspberrypi.org/debian/pool/main/c/compoundpi/
-  * http://archive.raspberrypi.org/debian/pool/main/p/python-sense-hat/
+  * http://archive.raspberrypi.org/debian/pool/main/p/python-sense-hat/ (debian/control add B-D python-numpy, python3-numpy)
   * http://archive.raspberrypi.org/debian/pool/main/a/astropi/
   * http://archive.raspberrypi.org/debian/pool/main/s/sense-hat/
+  * http://archive.raspberrypi.org/debian/pool/main/p/picraft/
+  * http://archive.raspberrypi.org/debian/pool/main/g/gpiozero/
+  * http://archive.raspberrypi.org/debian/pool/main/d/drumhat/
+  * http://archive.raspberrypi.org/debian/pool/main/e/envirohat/
+  * http://archive.raspberrypi.org/debian/pool/main/p/pianohat/
+  * http://archive.raspberrypi.org/debian/pool/main/p/pigpio/
+
 
 These are pending.
 
+  * http://kusti8.github.io/RPi-chromium/
+  * http://repozytorium.mati75.eu/raspbian/pool/main/c/chromium-browser/
+  * http://repozytorium.mati75.eu/raspbian/pool/main/q/qt5ct/
+  * http://repozytorium.mati75.eu/raspbian/pool/main/f/ffmpeg/ffmpeg_3.2-2~bpo8%2B2.dsc
   * http://archive.raspberrypi.org/debian/pool/main/p/pgzero/
   * https://archive.raspberrypi.org/debian/pool/main/e/epiphany-browser/
 
 These FTBFS.
 
   * http://archive.raspberrypi.org/debian/pool/main/g/gst-omx1.0/
-  * https://twolife.be/raspbian/pool/main/omxplayer/  
+  * http://repozytorium.mati75.eu/raspbian/pool/main/o/omxplayer/
+  * https://twolife.be/raspbian/pool/main/omxplayer/
 
 ## Kodi
 
