@@ -27,14 +27,13 @@ These are ported.
   * http://archive.raspberrypi.org/debian/pool/main/n/nuscratch/            (Modify wrapper in debian/scratch to just be "sudo ")
   * http://archive.raspberrypi.org/debian/pool/main/r/rtimulib/
   * http://archive.raspberrypi.org/debian/pool/main/r/raspi-config/
-  * http://archive.raspberrypi.org/debian/pool/main/r/rc-gui/
   * http://archive.raspberrypi.org/debian/pool/main/r/rpi.gpio/             (debian/control Just python3 and python3-dev. debian/rules only python2.7 and python3.5)
   * http://archive.raspberrypi.org/debian/pool/main/s/spidev/
   * http://archive.raspberrypi.org/debian/pool/main/c/codebug-i2c-tether/   (Hardcode target Python 3.x in debian/rules)
   * http://archive.raspberrypi.org/debian/pool/main/c/compoundpi/
   * http://archive.raspberrypi.org/debian/pool/main/p/python-sense-hat/     (debian/control add B-D python-numpy, python3-numpy)
   * http://archive.raspberrypi.org/debian/pool/main/a/astropi/
-  * http://archive.raspberrypi.org/debian/pool/main/s/sense-hat/
+  * http://archive.raspberrypi.org/debian/pool/main/s/sense-hat/            (add python-numpy/pil/rtmulib to B-D)
   * http://archive.raspberrypi.org/debian/pool/main/p/picraft/
   * http://archive.raspberrypi.org/debian/pool/main/g/gpiozero/
   * http://archive.raspberrypi.org/debian/pool/main/d/drumhat/
