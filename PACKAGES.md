@@ -56,6 +56,7 @@ These are pending.
   * http://repozytorium.mati75.eu/raspbian/pool/main/c/chromium-browser/
   * http://repozytorium.mati75.eu/raspbian/pool/main/q/qt5ct/
   * http://repozytorium.mati75.eu/raspbian/pool/main/f/ffmpeg/ffmpeg_3.2-2~bpo8%2B2.dsc
+  * https://twolife.be/raspbian/pool/main/ffmpeg/ffmpeg_3.2-2~bpo8+2+rpi1.dsc - Has Pi optimizations
   * http://archive.raspberrypi.org/debian/pool/main/p/pgzero/
   * https://archive.raspberrypi.org/debian/pool/main/e/epiphany-browser/
 
