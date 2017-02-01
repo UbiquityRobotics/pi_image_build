@@ -119,9 +119,11 @@ function apt_clean() {
 
 # Install Ubuntu minimal
 function ubuntu_minimal() {
-    chroot $R apt-get -y install f2fs-tools software-properties-common
     if [ ! -f "${R}/tmp/.minimal" ]; then
-        chroot $R apt-get -y install ubuntu-minimal
+        chroot $R apt-get -y install ubuntu-minimal software-properties-common
+        if [ "${FS}" == "f2fs" ]; then
+            chroot $R apt-get -y install ubuntu-minimal f2fs-tools
+        fi
         touch "${R}/tmp/.minimal"
     fi
 }
@@ -322,7 +324,6 @@ EOM
     chroot $R apt-get -y install libraspberrypi-bin libraspberrypi-dev \
     libraspberrypi-doc libraspberrypi0 raspberrypi-bootloader rpi-update
     chroot $R apt-get -y install bluez-firmware linux-firmware pi-bluetooth
-    chroot $R /bin/systemctl enable hciuart.service
 
     # Raspberry Pi 3 WiFi firmware. Supplements what is provided in linux-firmware
     cp -v firmware/* $R/lib/firmware/brcm/
@@ -356,7 +357,13 @@ EOM
     # Disable TLP
     if [ -f $R/etc/default/tlp ]; then
         sed -i s'/TLP_ENABLE=1/TLP_ENABLE=0/' $R/etc/default/tlp
+        chroot $R /bin/systemctl disable tlp.service
+        chroot $R /bin/systemctl disable tlp-sleep.service
     fi
+
+    # Disable smartd and whoopsie
+    chroot $R /bin/systemctl disable smartd.service
+    chroot $R /bin/systemctl disable whoopsie.service
 
     # copies-and-fills
     # Create /spindel_install so cofi doesn't segfault when chrooted via qemu-user-static
@@ -371,70 +378,10 @@ proc            /proc           proc    defaults          0       0
 /dev/mmcblk0p1  /boot/          vfat    defaults          0       2
 EOM
 
-    # Set up firmware config
-    cat <<EOM >$R/boot/config.txt
-# For more options and information see
-# http://www.raspberrypi.org/documentation/configuration/config-txt.md
-# Some settings may impact device functionality. See link above for details
-
-# uncomment if you get no picture on HDMI for a default "safe" mode
-#hdmi_safe=1
-
-# uncomment this if your display has a black border of unused pixels visible
-# and your display can output without overscan
-#disable_overscan=1
-
-# uncomment the following to adjust overscan. Use positive numbers if console
-# goes off screen, and negative if there is too much border
-#overscan_left=16
-#overscan_right=16
-#overscan_top=16
-#overscan_bottom=16
-
-# uncomment to force a console size. By default it will be display's size minus
-# overscan.
-#framebuffer_width=1280
-#framebuffer_height=720
-
-# uncomment if hdmi display is not detected and composite is being output
-#hdmi_force_hotplug=1
-
-# uncomment to force a specific HDMI mode (this will force VGA)
-#hdmi_group=1
-#hdmi_mode=1
-
-# uncomment to force a HDMI mode rather than DVI. This can make audio work in
-# DMT (computer monitor) modes
-#hdmi_drive=2
-
-# uncomment to increase signal to HDMI, if you have interference, blanking, or
-# no display
-#config_hdmi_boost=4
-
-# uncomment for composite PAL
-#sdtv_mode=2
-
-#uncomment to overclock the arm. 700 MHz is the default.
-#arm_freq=800
-
-# Uncomment some or all of these to enable the optional hardware interfaces
-#dtparam=i2c_arm=on
-#dtparam=i2s=on
-#dtparam=spi=on
-
-# Uncomment this to enable the lirc-rpi module
-#dtoverlay=lirc-rpi
-
-# Additional overlays and parameters are documented /boot/overlays/README
-
-# Enable audio (loads snd_bcm2835)
-dtparam=audio=on
-EOM
-
     if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
-        echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash" > $R/boot/cmdline.txt
+        echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash plymouth.ignore-serial-consoles" > $R/boot/cmdline.txt
     else
-        echo "dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash" > $R/boot/cmdline.txt
+        echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash plymouth.ignore-serial-consoles" > $R/boot/cmdline.txt
         # Enable VC4 on composited desktops
         if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
             echo "dtoverlay=vc4-kms-v3d" >> $R/boot/config.txt
