@@ -23,13 +23,13 @@ FLAVOUR="ubuntu-standard"
 FLAVOUR_NAME="Ubuntu"
 RELEASE="xenial"
 VERSION="16.04.2"
-QUALITY="beta"
+QUALITY="-rc1"
 
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"
 
-# Either 4, 8 or 16
-FS_SIZE=4
+# Target image size, will be represented in GB
+FS_SIZE=2
 
 # Either 0 or 1.
 # - 0 don't make generic rootfs tarball
