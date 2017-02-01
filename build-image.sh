@@ -62,7 +62,7 @@ function sync_to() {
     if [ ! -d "${TARGET}" ]; then
         mkdir -p "${TARGET}"
     fi
-    rsync -a --progress --delete ${R}/ ${TARGET}/
+    rsync -aHAXx --progress --delete ${R}/ ${TARGET}/
 }
 
 # Base debootstrap
@@ -305,12 +305,28 @@ function configure_hardware() {
     # Install the RPi PPA
     chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
     chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/crazy-pi
+
+    cat <<EOM >$R/etc/apt/preferences.d/ubuntu-pi-flavour-maker
+Package: *
+Pin: release o=LP-PPA-ubuntu-pi-flavour-makers-crazy-pi
+Pin-Priority: 991
+
+Package: *
+Pin: release o=LP-PPA-ubuntu-pi-flavour-makers-ppa
+Pin-Priority: 990
+EOM
+
     chroot $R apt-get update
 
     # Firmware Kernel installation
     chroot $R apt-get -y install libraspberrypi-bin libraspberrypi-dev \
     libraspberrypi-doc libraspberrypi0 raspberrypi-bootloader rpi-update
-    chroot $R apt-get -y install bluez-firmware firmware-brcm80211 linux-firmware pi-bluetooth
+    chroot $R apt-get -y install bluez-firmware linux-firmware pi-bluetooth
+    chroot $R /bin/systemctl enable hciuart.service
+
+    # Raspberry Pi 3 WiFi firmware. Supplements what is provided in linux-firmware
+    cp -v firmware/* $R/lib/firmware/brcm/
+    chown root:root $R/lib/firmware/brcm/*
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
         # Install fbturbo drivers on non composited desktop OS
@@ -416,11 +432,9 @@ dtparam=audio=on
 EOM
 
     if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
-        echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash" > $R/boot/cmdline.txt
+        echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash" > $R/boot/cmdline.txt
     else
-        echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash" > $R/boot/cmdline.txt
-        #sed -i 's/#framebuffer_depth=16/framebuffer_depth=32/' $R/boot/config.txt
-
+        echo "dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash" > $R/boot/cmdline.txt
         # Enable VC4 on composited desktops
         if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
             echo "dtoverlay=vc4-kms-v3d" >> $R/boot/config.txt
@@ -433,6 +447,7 @@ EOM
 
 function install_software() {
     local SCRATCH="http://archive.raspberrypi.org/debian/pool/main/s/scratch/scratch_1.4.20131203-2_all.deb"
+    local WIRINGPI="http://archive.raspberrypi.org/debian/pool/main/w/wiringpi/wiringpi_2.32_armhf.deb"
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ]; then
         # Python
@@ -473,16 +488,18 @@ function install_software() {
         chroot $R apt-get -y install youtube-dlg
 
         # Scratch (nuscratch)
-        # - Requires: scratch
+        # - Requires: scratch and used to require wiringpi
+        wget -c "${WIRINGPI}" -O $R/tmp/wiringpi.deb
+        chroot $R gdebi -n /tmp/wiringpi.deb
         wget -c "${SCRATCH}" -O $R/tmp/scratch.deb
         chroot $R gdebi -n /tmp/scratch.deb
         chroot $R apt-get -y install nuscratch
 
         # Minecraft
-        chroot $R apt-get -y install minecraft-pi python-picraft python3-picraft
+        chroot $R apt-get -y install minecraft-pi python-picraft python3-picraft --allow-downgrades
 
         # Sonic Pi
-        chroot $R apt-get -y install sonic-pi=2.9.0~repack-6
+        chroot $R apt-get -y install sonic-pi
 
         # raspi-config - Needs forking/modifying to support Ubuntu
         # chroot $R apt-get -y install raspi-config
@@ -548,66 +565,61 @@ function clean_up() {
 function make_raspi2_image() {
     # Build the image file
     local FS="${1}"
-    local GB=${2}
+    local SIZE_IMG="${2}"
+    local SIZE_BOOT="64MiB"
 
     if [ "${FS}" != "ext4" ] && [ "${FS}" != 'f2fs' ]; then
         echo "ERROR! Unsupport filesystem requested. Exitting."
         exit 1
     fi
 
-    if [ ${GB} -ne 4 ] && [ ${GB} -ne 8 ] && [ ${GB} -ne 16 ]; then
-        echo "ERROR! Unsupport card image size requested. Exitting."
-        exit 1
-    fi
-
-    if [ ${GB} -eq 4 ]; then
-        SEEK=3750
-        SIZE=7546880
-        SIZE_LIMIT=3685
-    elif [ ${GB} -eq 8 ]; then
-        SEEK=7680
-        SIZE=15728639
-        SIZE_LIMIT=7615
-    elif [ ${GB} -eq 16 ]; then
-        SEEK=15360
-        SIZE=31457278
-        SIZE_LIMIT=15230
-    fi
-
-    # If a compress version exists, remove it.
+    # Remove old images.
+    rm -f "${BASEDIR}/${IMAGE}" || true
     rm -f "${BASEDIR}/${IMAGE}.bz2" || true
 
-    dd if=/dev/zero of="${BASEDIR}/${IMAGE}" bs=1M count=1
-    dd if=/dev/zero of="${BASEDIR}/${IMAGE}" bs=1M count=0 seek=${SEEK}
+    # Create an empty file file.
+    dd if=/dev/zero of="${BASEDIR}/${IMAGE}" bs=1MB count=1
+    dd if=/dev/zero of="${BASEDIR}/${IMAGE}" bs=1MB count=0 seek=$(( ${SIZE_IMG} * 1000 ))
 
-    sfdisk -f "$BASEDIR/${IMAGE}" <<EOM
-unit: sectors
+    # Initialising: msdos
+    parted -s ${BASEDIR}/${IMAGE} mktable msdos
+    echo "Creating /boot partition"
+    parted -a optimal -s ${BASEDIR}/${IMAGE} mkpart primary fat32 1 "${SIZE_BOOT}"
+    echo "Creating /root partition"
+    parted -a optimal -s ${BASEDIR}/${IMAGE} mkpart primary ext4 "${SIZE_BOOT}" 100%
 
-1 : start=     2048, size=   131072, Id= c, bootable
-2 : start=   133120, size=  ${SIZE}, Id=83
-3 : start=        0, size=        0, Id= 0
-4 : start=        0, size=        0, Id= 0
-EOM
+    PARTED_OUT=$(parted -s ${BASEDIR}/${IMAGE} unit b print)
+    BOOT_OFFSET=$(echo "${PARTED_OUT}" | grep -e '^ 1'| xargs echo -n \
+    | cut -d" " -f 2 | tr -d B)
+    BOOT_LENGTH=$(echo "${PARTED_OUT}" | grep -e '^ 1'| xargs echo -n \
+    | cut -d" " -f 4 | tr -d B)
 
-    BOOT_LOOP="$(losetup -o 1M --sizelimit 64M -f --show ${BASEDIR}/${IMAGE})"
-    ROOT_LOOP="$(losetup -o 65M --sizelimit ${SIZE_LIMIT}M -f --show ${BASEDIR}/${IMAGE})"
+    ROOT_OFFSET=$(echo "${PARTED_OUT}" | grep -e '^ 2'| xargs echo -n \
+    | cut -d" " -f 2 | tr -d B)
+    ROOT_LENGTH=$(echo "${PARTED_OUT}" | grep -e '^ 2'| xargs echo -n \
+    | cut -d" " -f 4 | tr -d B)
+
+    BOOT_LOOP=$(losetup --show -f -o ${BOOT_OFFSET} --sizelimit ${BOOT_LENGTH} ${BASEDIR}/${IMAGE})
+    ROOT_LOOP=$(losetup --show -f -o ${ROOT_OFFSET} --sizelimit ${ROOT_LENGTH} ${BASEDIR}/${IMAGE})
+    echo "/boot: offset ${BOOT_OFFSET}, length ${BOOT_LENGTH}"
+    echo "/:     offset ${ROOT_OFFSET}, length ${ROOT_LENGTH}"
+
     mkfs.vfat -n PI_BOOT -S 512 -s 16 -v "${BOOT_LOOP}"
     if [ "${FS}" == "ext4" ]; then
-        mkfs.ext4 -L PI_ROOT -m 0 "${ROOT_LOOP}"
+        mkfs.ext4 -L PI_ROOT -m 0 -O ^huge_file "${ROOT_LOOP}"
     else
         mkfs.f2fs -l PI_ROOT -o 1 "${ROOT_LOOP}"
     fi
+
     MOUNTDIR="${BUILDDIR}/mount"
     mkdir -p "${MOUNTDIR}"
-    mount "${ROOT_LOOP}" "${MOUNTDIR}"
+    mount -v "${ROOT_LOOP}" "${MOUNTDIR}" -t "${FS}"
     mkdir -p "${MOUNTDIR}/boot"
-    mount "${BOOT_LOOP}" "${MOUNTDIR}/boot"
-    rsync -a --progress "$R/" "${MOUNTDIR}/"
+    mount -v "${BOOT_LOOP}" "${MOUNTDIR}/boot" -t vfat
+    rsync -aHAXx "$R/" "${MOUNTDIR}/"
+    sync
     umount -l "${MOUNTDIR}/boot"
     umount -l "${MOUNTDIR}"
-    fsck -y "${BOOT_LOOP}"
-    fsck -y "${ROOT_LOOP}"
-    tune2fs -c 0 -i 0 "${ROOT_LOOP}"
     losetup -d "${ROOT_LOOP}"
     losetup -d "${BOOT_LOOP}"
 }
@@ -686,7 +698,7 @@ function stage_04_corrections() {
     make_raspi2_image ${FS_TYPE} ${FS_SIZE}
 }
 
-stage_01_base
-stage_02_desktop
+#stage_01_base
+#stage_02_desktop
 stage_03_raspi2
-stage_04_corrections
+#stage_04_corrections
