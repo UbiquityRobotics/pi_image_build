@@ -651,9 +651,21 @@ function stage_02_desktop() {
 
     if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
         echo "Skipping desktop install for ${FLAVOUR}"
-    elif [ "${FLAVOUR}" == "lubuntu" ] || [ "${FLAVOUR}" == "ubuntu-mate" ]; then
+    elif [ "${FLAVOUR}" == "lubuntu" ]; then
         install_meta ${FLAVOUR}-core --no-install-recommends
         install_meta ${FLAVOUR}-desktop --no-install-recommends
+    elif [ "${FLAVOUR}" == "ubuntu-mate" ]; then
+        # Add the MATE Desktop PPA for Xenial and install meta packages
+        # the "old" way
+        if [ "${RELEASE}" == "xenial" ]; then
+            chroot $R apt-add-repository -y ppa:ubuntu-mate-dev/xenial-mate
+            chroot $R apt-get update
+            install_meta ${FLAVOUR}-core --no-install-recommends
+            install_meta ${FLAVOUR}-desktop --no-install-recommends
+        else
+            install_meta ${FLAVOUR}-core
+            install_meta ${FLAVOUR}-desktop
+        fi
     elif [ "${FLAVOUR}" == "xubuntu" ]; then
         install_meta ${FLAVOUR}-core
         install_meta ${FLAVOUR}-desktop
@@ -698,7 +710,7 @@ function stage_04_corrections() {
     make_raspi2_image ${FS_TYPE} ${FS_SIZE}
 }
 
-#stage_01_base
-#stage_02_desktop
+stage_01_base
+stage_02_desktop
 stage_03_raspi2
-#stage_04_corrections
+stage_04_corrections
