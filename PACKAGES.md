@@ -8,7 +8,6 @@ These rough notes keep track of what Raspberry Pi packages have been
 These are ported.
 
   * http://archive.raspberrypi.org/debian/pool/main/r/raspberrypi-firmware/
-  * https://archive.raspberrypi.org/debian/pool/main/f/firmware-nonfree/
   * https://launchpad.net/~fo0bar/+archive/ubuntu/rpi2-nightly/+files/
 
 These are pending.
@@ -16,11 +15,6 @@ These are pending.
 Sadly COFI fails to build in a PPA :-(
 
   * http://archive.raspberrypi.org/debian/pool/main/r/raspi-copies-and-fills/
-
-These are for reference.
-
-  * https://twolife.be/raspbian/pool/main/bcm-videocore-pkgconfig/
-  * https://twolife.be/raspbian/pool/main/linux/
 
 ## Applications
 
@@ -30,16 +24,15 @@ These are ported.
   * http://archive.raspberrypi.org/debian/pool/main/r/raspi-gpio/
   * http://archive.raspberrypi.org/debian/pool/main/s/sonic-pi/
   * http://archive.raspberrypi.org/debian/pool/main/p/picamera/
-  * http://archive.raspberrypi.org/debian/pool/main/n/nuscratch/ (Modify wrapper in debian/scratch to just be "sudo ")
+  * http://archive.raspberrypi.org/debian/pool/main/n/nuscratch/            (Modify wrapper in debian/scratch to just be "sudo ")
   * http://archive.raspberrypi.org/debian/pool/main/r/rtimulib/
   * http://archive.raspberrypi.org/debian/pool/main/r/raspi-config/
   * http://archive.raspberrypi.org/debian/pool/main/r/rc-gui/
-  * http://archive.raspberrypi.org/debian/pool/main/r/rpi.gpio/ (debian/control Just python3 and python3-dev. debian/rules only python2.7 and python3.5)
+  * http://archive.raspberrypi.org/debian/pool/main/r/rpi.gpio/             (debian/control Just python3 and python3-dev. debian/rules only python2.7 and python3.5)
   * http://archive.raspberrypi.org/debian/pool/main/s/spidev/
-  * http://archive.raspberrypi.org/debian/pool/main/c/codebug-tether/
-  * http://archive.raspberrypi.org/debian/pool/main/c/codebug-i2c-tether/ (Hardcode target Python 3.x in debian/rules)
+  * http://archive.raspberrypi.org/debian/pool/main/c/codebug-i2c-tether/   (Hardcode target Python 3.x in debian/rules)
   * http://archive.raspberrypi.org/debian/pool/main/c/compoundpi/
-  * http://archive.raspberrypi.org/debian/pool/main/p/python-sense-hat/ (debian/control add B-D python-numpy, python3-numpy)
+  * http://archive.raspberrypi.org/debian/pool/main/p/python-sense-hat/     (debian/control add B-D python-numpy, python3-numpy)
   * http://archive.raspberrypi.org/debian/pool/main/a/astropi/
   * http://archive.raspberrypi.org/debian/pool/main/s/sense-hat/
   * http://archive.raspberrypi.org/debian/pool/main/p/picraft/
@@ -62,8 +55,9 @@ These are pending.
 
 These FTBFS.
 
+  * http://archive.raspberrypi.org/debian/pool/main/c/codebug-tether/ (Currently pip installed into the image)
   * http://archive.raspberrypi.org/debian/pool/main/g/gst-omx1.0/
-  * http://repozytorium.mati75.eu/raspbian/pool/main/o/omxplayer/
+  * http://repozytorium.mati75.eu/raspbian/pool/main/o/omxplayer/ (Currently wget into image)
   * https://twolife.be/raspbian/pool/main/omxplayer/
 
 ## Kodi
