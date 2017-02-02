@@ -298,12 +298,6 @@ function configure_hardware() {
         exit 1
     fi
 
-    chroot $R apt-get -y update
-
-    # gdebi-core used for installing copies-and-fills and omxplayer
-    chroot $R apt-get -y install gdebi-core
-    local COFI="http://archive.raspberrypi.org/debian/pool/main/r/raspi-copies-and-fills/raspi-copies-and-fills_0.5-1_armhf.deb"
-
     # Install the RPi PPA
     chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
     chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/crazy-pi
@@ -340,7 +334,7 @@ EOM
         local OMX="http://omxplayer.sconde.net/builds/omxplayer_0.3.7~git20160923~dfea8c9_armhf.deb"
         # - Requires: libpcre3 libfreetype6 fonts-freefont-ttf dbus libssl1.0.0 libsmbclient libssh-4
         wget -c "${OMX}" -O $R/tmp/omxplayer.deb
-        chroot $R gdebi -n /tmp/omxplayer.deb
+        chroot $R apt-get -y install /tmp/omxplayer.deb
 
         # Make Ubiquity "compatible" with the Raspberry Pi Foundation kernel.
         if [ ${OEM_CONFIG} -eq 1 ]; then
@@ -354,29 +348,29 @@ EOM
     # Install Raspberry Pi system tweaks
     chroot $R apt-get -y install raspberrypi-general-mods raspberrypi-sys-mods
 
-    # Disable TLP
+    # Disable TLP because it is redundant on the Pi
     if [ -f $R/etc/default/tlp ]; then
         sed -i s'/TLP_ENABLE=1/TLP_ENABLE=0/' $R/etc/default/tlp
         chroot $R /bin/systemctl disable tlp.service
         chroot $R /bin/systemctl disable tlp-sleep.service
     fi
 
-    # Disable smartd and whoopsie
-    chroot $R /bin/systemctl disable smartd.service
+    # Disable apport and whoopsie because the images are not official
+    if [ -f $R/etc/default/apport ]; then
+        sed -i s'/enabled=1/enabled=0/' $R/etc/default/apport
+        chroot $R /bin/systemctl disable apport-forward.socket
+    fi    
     chroot $R /bin/systemctl disable whoopsie.service
+
+    # Disable brltty because is hit SECCOMP errors
+    chroot $R /bin/systemctl disable brltty.service
 
     # copies-and-fills
     # Create /spindel_install so cofi doesn't segfault when chrooted via qemu-user-static
+    local COFI="http://archive.raspberrypi.org/debian/pool/main/r/raspi-copies-and-fills/raspi-copies-and-fills_0.5-1_armhf.deb"
     touch $R/spindle_install
     wget -c "${COFI}" -O $R/tmp/cofi.deb
-    chroot $R gdebi -n /tmp/cofi.deb
-
-    # Set up fstab
-    cat <<EOM >$R/etc/fstab
-proc            /proc           proc    defaults          0       0
-/dev/mmcblk0p2  /               ${FS}   defaults,noatime  0       1
-/dev/mmcblk0p1  /boot/          vfat    defaults          0       2
-EOM
+    chroot $R apt-get -y install /tmp/cofi.deb
 
     if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
         echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash plymouth.ignore-serial-consoles" > $R/boot/cmdline.txt
@@ -388,13 +382,18 @@ EOM
         fi
     fi
 
+    # Set up fstab
+    cat <<EOM >$R/etc/fstab
+proc            /proc           proc    defaults          0       0
+/dev/mmcblk0p2  /               ${FS}   defaults,noatime  0       1
+/dev/mmcblk0p1  /boot/          vfat    defaults          0       2
+EOM
+
     # Save the clock
     chroot $R fake-hwclock save
 }
 
 function install_software() {
-    local SCRATCH="http://archive.raspberrypi.org/debian/pool/main/s/scratch/scratch_1.4.20131203-2_all.deb"
-    local WIRINGPI="http://archive.raspberrypi.org/debian/pool/main/w/wiringpi/wiringpi_2.32_armhf.deb"
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ]; then
         # Python
@@ -436,10 +435,12 @@ function install_software() {
 
         # Scratch (nuscratch)
         # - Requires: scratch and used to require wiringpi
+        local SCRATCH="http://archive.raspberrypi.org/debian/pool/main/s/scratch/scratch_1.4.20131203-2_all.deb"
+        local WIRINGPI="http://archive.raspberrypi.org/debian/pool/main/w/wiringpi/wiringpi_2.32_armhf.deb"
         wget -c "${WIRINGPI}" -O $R/tmp/wiringpi.deb
-        chroot $R gdebi -n /tmp/wiringpi.deb
+        chroot $R apt-get -y install /tmp/wiringpi.deb
         wget -c "${SCRATCH}" -O $R/tmp/scratch.deb
-        chroot $R gdebi -n /tmp/scratch.deb
+        chroot $R apt-get -y install /tmp/scratch.deb
         chroot $R apt-get -y install nuscratch
 
         # Minecraft
@@ -602,11 +603,8 @@ function stage_02_desktop() {
         install_meta ${FLAVOUR}-core --no-install-recommends
         install_meta ${FLAVOUR}-desktop --no-install-recommends
     elif [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-        # Add the MATE Desktop PPA for Xenial and install meta packages
-        # the "old" way
+        # Install meta packages the "old" way for Xenial
         if [ "${RELEASE}" == "xenial" ]; then
-            chroot $R apt-add-repository -y ppa:ubuntu-mate-dev/xenial-mate
-            chroot $R apt-get update
             install_meta ${FLAVOUR}-core --no-install-recommends
             install_meta ${FLAVOUR}-desktop --no-install-recommends
         else
@@ -649,7 +647,14 @@ function stage_04_corrections() {
     R=${DEVICE_R}
     mount_system
 
-    #Insert corrections here.
+    # Add the MATE Desktop PPA for Xenial
+    if [ "${RELEASE}" == "xenial" ] && [ "${FLAVOUR}" == "ubuntu-mate" ]; then
+        chroot $R apt-add-repository -y ppa:ubuntu-mate-dev/xenial-mate
+        chroot $R apt-get update
+        chroot $R apt-get -y dist-upgrade
+    fi
+
+    # Insert other corrections here.
 
     apt_clean
     clean_up
