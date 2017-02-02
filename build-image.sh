@@ -359,11 +359,14 @@ EOM
     if [ -f $R/etc/default/apport ]; then
         sed -i s'/enabled=1/enabled=0/' $R/etc/default/apport
         chroot $R /bin/systemctl disable apport-forward.socket
-    fi    
-    chroot $R /bin/systemctl disable whoopsie.service
-
-    # Disable brltty because is hit SECCOMP errors
-    chroot $R /bin/systemctl disable brltty.service
+    fi
+    
+    if [ "${FLAVOUR}" != "ubuntu-minimal" ]; then
+        # Disable whoopsie
+        chroot $R /bin/systemctl disable whoopsie.service
+        # Disable brltty because is hit SECCOMP errors
+        chroot $R /bin/systemctl disable brltty.service
+    fi
 
     # copies-and-fills
     # Create /spindel_install so cofi doesn't segfault when chrooted via qemu-user-static
