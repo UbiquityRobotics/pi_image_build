@@ -23,7 +23,7 @@ FLAVOUR="ubuntu-standard"
 FLAVOUR_NAME="Ubuntu"
 RELEASE="xenial"
 VERSION="16.04.2"
-QUALITY="-rc1"
+QUALITY="-rc2"
 
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"
