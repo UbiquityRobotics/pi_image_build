@@ -6,19 +6,8 @@
 # Copyright (C) 2015 Rohith Madhavan <rohithmadhavan@gmail.com>
 # Copyright (C) 2015 Ryan Finnie <ryan@finnie.org>
 #
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# See the included LICENSE file.
+# 
 ########################################################################
 
 set -ex
@@ -120,15 +109,15 @@ function apt_clean() {
 # Install Ubuntu minimal
 function ubuntu_minimal() {
     if [ ! -f "${R}/tmp/.minimal" ]; then
-        chroot $R apt-get -y install ubuntu-minimal software-properties-common
+        chroot $R apt-get -y install ubuntu-minimal parted software-properties-common
         if [ "${FS}" == "f2fs" ]; then
-            chroot $R apt-get -y install ubuntu-minimal f2fs-tools
+            chroot $R apt-get -y install f2fs-tools
         fi
         touch "${R}/tmp/.minimal"
     fi
 }
 
-# Install Ubuntu minimal
+# Install Ubuntu standard
 function ubuntu_standard() {
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ ! -f "${R}/tmp/.standard" ]; then
         chroot $R apt-get -y install ubuntu-standard
@@ -171,15 +160,7 @@ function create_groups() {
     chroot $R groupadd -f --system spi
 
     # Create adduser hook
-    cat <<'EOM' >$R/usr/local/sbin/adduser.local
-#!/bin/sh
-# This script is executed as the final step when calling `adduser`
-# USAGE:
-#   adduser.local USER UID GID HOME
-
-# Add user to the Raspberry Pi specific groups
-usermod -a -G adm,gpio,i2c,input,spi,video $1
-EOM
+    cp files/adduser.local $R/usr/local/sbin/adduser.local
     chmod +x $R/usr/local/sbin/adduser.local
 }
 
@@ -224,30 +205,7 @@ function prepare_oem_config() {
 
 function configure_ssh() {
     chroot $R apt-get -y install openssh-server
-    cat > $R/etc/systemd/system/sshdgenkeys.service << EOF
-[Unit]
-Description=SSH key generation on first startup
-Before=ssh.service
-ConditionPathExists=|!/etc/ssh/ssh_host_key
-ConditionPathExists=|!/etc/ssh/ssh_host_key.pub
-ConditionPathExists=|!/etc/ssh/ssh_host_rsa_key
-ConditionPathExists=|!/etc/ssh/ssh_host_rsa_key.pub
-ConditionPathExists=|!/etc/ssh/ssh_host_dsa_key
-ConditionPathExists=|!/etc/ssh/ssh_host_dsa_key.pub
-ConditionPathExists=|!/etc/ssh/ssh_host_ecdsa_key
-ConditionPathExists=|!/etc/ssh/ssh_host_ecdsa_key.pub
-ConditionPathExists=|!/etc/ssh/ssh_host_ed25519_key
-ConditionPathExists=|!/etc/ssh/ssh_host_ed25519_key.pub
-
-[Service]
-ExecStart=/usr/bin/ssh-keygen -A
-Type=oneshot
-RemainAfterExit=yes
-
-[Install]
-WantedBy=ssh.service
-EOF
-
+    cp files/sshdgenkeys.service > $R/etc/systemd/system/sshdgenkeys.service
     mkdir -p $R/etc/systemd/system/ssh.service.wants
     chroot $R ln -s /etc/systemd/system/sshdgenkeys.service /etc/systemd/system/ssh.service.wants
 }
@@ -376,19 +334,28 @@ EOM
     wget -c "${COFI}" -O $R/tmp/cofi.deb
     chroot $R apt-get -y install /tmp/cofi.deb
 
-    if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
-        echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles init=/usr/lib/raspi-config/init_resize.sh" > $R/boot/cmdline.txt
+    # Add /root partition resize
+    if [ "${FS}" == "ext4" ]; then
+        CMDLINE_INIT="init=/usr/lib/raspi-config/init_resize.sh"
+
+        # Add the first boot filesystem resize
+        mkdir -p $R/usr/lib/raspi-config/
+        cp files/init_resize.sh $R/usr/lib/raspi-config/
+        cp files/resize2fs_once	$R/etc/init.d/
+        chroot $R /bin/systemctl enable resize2fs_once        
     else
-        echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles init=/usr/lib/raspi-config/init_resize.sh" > $R/boot/cmdline.txt
+        CMDLINE_INIT=""
+    fi
+
+    if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
+        echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/cmdline.txt
+    else
+        echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/cmdline.txt
         # Enable VC4 on composited desktops
         if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
             echo "dtoverlay=vc4-kms-v3d" >> $R/boot/config.txt
         fi
     fi
-
-    # Add the first boot disk partition resize
-    mkdir -p $R/usr/lib/raspi-config/
-    cp init_resize.sh $R/usr/lib/raspi-config/
 
     # Set up fstab
     cat <<EOM >$R/etc/fstab
@@ -669,4 +636,4 @@ function stage_04_corrections() {
 stage_01_base
 stage_02_desktop
 stage_03_raspi2
-stage_04_corrections
+#stage_04_corrections
