@@ -2,7 +2,7 @@
 
 ########################################################################
 #
-# Copyright (C) 2015 Martin Wimpress <code@ubuntu-mate.org>
+# Copyright (C) 2015 - 2017 Martin Wimpress <code@ubuntu-mate.org>
 # Copyright (C) 2015 Rohith Madhavan <rohithmadhavan@gmail.com>
 # Copyright (C) 2015 Ryan Finnie <ryan@finnie.org>
 #
@@ -360,30 +360,35 @@ EOM
         sed -i s'/enabled=1/enabled=0/' $R/etc/default/apport
         chroot $R /bin/systemctl disable apport-forward.socket
     fi
-    
-    if [ "${FLAVOUR}" != "ubuntu-minimal" ]; then
-        # Disable whoopsie
+    if [ -f $R/usr/bin/whoopsie ]; then
         chroot $R /bin/systemctl disable whoopsie.service
-        # Disable brltty because is hit SECCOMP errors
+    fi
+
+    # Disable brltty because is hit SECCOMP errors
+    if [ -f $R/sbin/brltty ]; then
         chroot $R /bin/systemctl disable brltty.service
     fi
 
     # copies-and-fills
     # Create /spindel_install so cofi doesn't segfault when chrooted via qemu-user-static
-    local COFI="http://archive.raspberrypi.org/debian/pool/main/r/raspi-copies-and-fills/raspi-copies-and-fills_0.5-1_armhf.deb"
     touch $R/spindle_install
+    local COFI="http://archive.raspberrypi.org/debian/pool/main/r/raspi-copies-and-fills/raspi-copies-and-fills_0.5-1_armhf.deb"
     wget -c "${COFI}" -O $R/tmp/cofi.deb
     chroot $R apt-get -y install /tmp/cofi.deb
 
     if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
-        echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash plymouth.ignore-serial-consoles" > $R/boot/cmdline.txt
+        echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles init=/usr/lib/raspi-config/init_resize.sh" > $R/boot/cmdline.txt
     else
-        echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline rootwait quiet splash plymouth.ignore-serial-consoles" > $R/boot/cmdline.txt
+        echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles init=/usr/lib/raspi-config/init_resize.sh" > $R/boot/cmdline.txt
         # Enable VC4 on composited desktops
         if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
             echo "dtoverlay=vc4-kms-v3d" >> $R/boot/config.txt
         fi
     fi
+
+    # Add the first boot disk partition resize
+    mkdir -p $R/usr/lib/raspi-config/
+    cp init_resize.sh $R/usr/lib/raspi-config/
 
     # Set up fstab
     cat <<EOM >$R/etc/fstab
@@ -451,9 +456,6 @@ function install_software() {
 
         # Sonic Pi
         chroot $R apt-get -y install sonic-pi
-
-        # raspi-config - Needs forking/modifying to support Ubuntu
-        # chroot $R apt-get -y install raspi-config
     fi
 }
 
@@ -485,8 +487,6 @@ function clean_up() {
     rm -f $R/boot/.firmware_revision || true
     rm -rf $R/boot.bak || true
     rm -rf $R/lib/modules.bak || true
-    # Old kernel modules
-    #rm -rf $R/lib/modules/4.1.19* || true
 
     # Potentially sensitive.
     rm -f $R/root/.bash_history
@@ -511,6 +511,7 @@ function clean_up() {
     rm -rf $R/tmp/.bootstrap || true
     rm -rf $R/tmp/.minimal || true
     rm -rf $R/tmp/.standard || true
+    rm -rf $R/spindle_install || true
 }
 
 function make_raspi2_image() {
