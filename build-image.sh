@@ -437,6 +437,8 @@ function install_software() {
         chroot $R apt-get -y install minecraft-pi python-picraft python3-picraft --allow-downgrades
 
         # Sonic Pi
+        cp files/jackd.conf $R/tmp/
+        chroot $R debconf-set-selections < /tmp/jackd.conf
         chroot $R apt-get -y install sonic-pi
     fi
 }
