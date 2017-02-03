@@ -205,9 +205,9 @@ function prepare_oem_config() {
 
 function configure_ssh() {
     chroot $R apt-get -y install openssh-server
-    cp files/sshdgenkeys.service > $R/etc/systemd/system/sshdgenkeys.service
+    cp files/sshdgenkeys.service $R/lib/systemd/system/
     mkdir -p $R/etc/systemd/system/ssh.service.wants
-    chroot $R ln -s /etc/systemd/system/sshdgenkeys.service /etc/systemd/system/ssh.service.wants
+    chroot $R /bin/systemctl enable sshdgenkeys.service
 }
 
 function configure_network() {
@@ -246,6 +246,40 @@ iface lo inet loopback
 auto eth0
 iface eth0 inet dhcp
 EOM
+    fi
+}
+
+function disable_services() {
+    # Disable ntp because systemd-timesyncd will take care of this.
+    if [ -f $R/etc/init.d/ntp ]; then
+        chroot $R /bin/systemctl disable ntp
+        chmod -x $R/usr/sbin/ntpd
+        cp files/prefer-timesyncd.service $R/lib/systemd/system/
+        chroot $R /bin/systemctl enable prefer-timesyncd.service
+    fi
+
+    # Disable irqbalance because it is little, if any, benefit ARM.
+    if [ -f $R/etc/init.d/irqbalance]; then
+        chroot $R /bin/systemctl disable irqbalance
+    fi
+
+    # Disable TLP because it is redundant on ARM devices.
+    if [ -f $R/etc/default/tlp ]; then
+        sed -i s'/TLP_ENABLE=1/TLP_ENABLE=0/' $R/etc/default/tlp
+        chroot $R /bin/systemctl disable tlp.service
+        chroot $R /bin/systemctl disable tlp-sleep.service
+    fi
+
+    # Disable apport because these images are not official
+    if [ -f $R/etc/default/apport ]; then
+        sed -i s'/enabled=1/enabled=0/' $R/etc/default/apport
+        chroot $R /bin/systemctl disable apport.service
+        chroot $R /bin/systemctl disable apport-forward.socket
+    fi
+
+    # Disable whoopsie because these images are not official
+    if [ -f $R/usr/bin/whoopsie ]; then
+        chroot $R /bin/systemctl disable whoopsie.service
     fi
 }
 
@@ -300,27 +334,11 @@ EOM
         fi
     fi
 
-    # Hardware - Create a fake HW clock and add rng-tools
-    chroot $R apt-get -y install fake-hwclock fbset i2c-tools rng-tools
-
     # Install Raspberry Pi system tweaks
-    chroot $R apt-get -y install raspberrypi-general-mods raspberrypi-sys-mods
+    chroot $R apt-get -y install fbset raspberrypi-general-mods raspberrypi-sys-mods
 
-    # Disable TLP because it is redundant on the Pi
-    if [ -f $R/etc/default/tlp ]; then
-        sed -i s'/TLP_ENABLE=1/TLP_ENABLE=0/' $R/etc/default/tlp
-        chroot $R /bin/systemctl disable tlp.service
-        chroot $R /bin/systemctl disable tlp-sleep.service
-    fi
-
-    # Disable apport and whoopsie because the images are not official
-    if [ -f $R/etc/default/apport ]; then
-        sed -i s'/enabled=1/enabled=0/' $R/etc/default/apport
-        chroot $R /bin/systemctl disable apport-forward.socket
-    fi
-    if [ -f $R/usr/bin/whoopsie ]; then
-        chroot $R /bin/systemctl disable whoopsie.service
-    fi
+    # Enable hardware random number generator
+    chroot $R apt-get -y install rng-tools
 
     # Disable brltty because is hit SECCOMP errors
     if [ -f $R/sbin/brltty ]; then
@@ -363,9 +381,6 @@ proc            /proc           proc    defaults          0       0
 /dev/mmcblk0p2  /               ${FS}   defaults,noatime  0       1
 /dev/mmcblk0p1  /boot/          vfat    defaults          0       2
 EOM
-
-    # Save the clock
-    chroot $R fake-hwclock save
 }
 
 function install_software() {
@@ -460,7 +475,9 @@ function clean_up() {
     rm -f $R/root/.ssh/known_hosts
 
     # Remove bogus home directory
-    rm -rf $R/home/${SUDO_USER} || true
+    if [ -d $R/home/${SUDO_USER} ]; then
+        rm -rf $R/home/${SUDO_USER} || true
+    fi
 
     # Machine-specific, so remove in case this system is going to be
     # cloned.  These will be regenerated on the first boot.
@@ -494,7 +511,6 @@ function make_raspi2_image() {
 
     # Remove old images.
     rm -f "${BASEDIR}/${IMAGE}" || true
-    rm -f "${BASEDIR}/${IMAGE}.bz2" || true
 
     # Create an empty file file.
     dd if=/dev/zero of="${BASEDIR}/${IMAGE}" bs=1MB count=1
@@ -594,6 +610,7 @@ function stage_02_desktop() {
     prepare_oem_config
     configure_ssh
     configure_network
+    disable_services
     apt_upgrade
     apt_clean
     umount_system
