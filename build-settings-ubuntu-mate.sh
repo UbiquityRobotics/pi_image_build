@@ -23,7 +23,7 @@ FLAVOUR="ubuntu-mate"
 FLAVOUR_NAME="Ubuntu MATE"
 RELEASE="xenial"
 VERSION="16.04.2"
-QUALITY="-rc2"
+QUALITY="-rc3"
 
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"
