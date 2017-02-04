@@ -10,7 +10,7 @@ reboot_pi () {
 
 check_commands () {
   if ! command -v whiptail > /dev/null; then
-      echo ="whiptail not found"
+      FAIL_REASON="whiptail not found"
       sleep 5
       return 1
   fi
@@ -98,11 +98,11 @@ if ! check_commands; then
 fi
 
 if main; then
-  whiptail --infobox "Resized root filesystem. Rebooting in 5 seconds..." 20 60
+  whiptail --infobox "Resized root partition. Rebooting in 5 seconds..." 20 60
   sleep 5
 else
   sleep 5
-  whiptail --msgbox "Could not expand filesystem, please try raspi-config or rc_gui.\n${FAIL_REASON}" 20 60
+  whiptail --msgbox "Could not expand filesystem, please try raspi-config.\n${FAIL_REASON}" 20 60
 fi
 
 reboot_pi
