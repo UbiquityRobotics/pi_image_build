@@ -259,7 +259,7 @@ function disable_services() {
     fi
 
     # Disable irqbalance because it is little, if any, benefit ARM.
-    if [ -f $R/etc/init.d/irqbalance]; then
+    if [ -f $R/etc/init.d/irqbalance ]; then
         chroot $R /bin/systemctl disable irqbalance
     fi
 
@@ -438,7 +438,7 @@ function install_software() {
 
         # Sonic Pi
         cp files/jackd.conf $R/tmp/
-        chroot $R debconf-set-selections < /tmp/jackd.conf
+        chroot $R debconf-set-selections -v /tmp/jackd.conf
         chroot $R apt-get -y install sonic-pi
     fi
 }
@@ -561,11 +561,37 @@ function make_raspi2_image() {
     losetup -d "${BOOT_LOOP}"
 }
 
+function make_hash() {
+    local FILE="${1}"
+    local HASH="sha256"
+    local KEY="FFEE1E5C"
+    if [ ! -f ${FILE}.${HASH}.sign ]; then
+        if [ -f ${FILE} ]; then
+            ${HASH}sum ${FILE} > ${FILE}.${HASH}
+            sed -i -r "s/ .*\/(.+)/  \1/g" ${FILE}.${HASH}
+            gpg --default-key ${KEY} --armor --output ${FILE}.${HASH}.sign --detach-sig ${FILE}.${HASH}
+        else
+            echo "WARNING! Didn't find ${FILE} to hash."
+        fi
+    else
+        echo "Existing signature found, skipping..."
+    fi
+}
+
 function make_tarball() {
     if [ ${MAKE_TARBALL} -eq 1 ]; then
         rm -f "${BASEDIR}/${TARBALL}" || true
         tar -cSf "${BASEDIR}/${TARBALL}" $R
+        make_hash "${BASEDIR}/${TARBALL}"
     fi
+}
+
+function compress_image() {
+    if [ ! -e "${BASEDIR}/${IMAGE}.xz" ]; then
+        echo "Compressing to: ${BASEDIR}/${IMAGE}.xz"
+        xz ${BASEDIR}/${IMAGE}
+    fi
+    make_hash "${BASEDIR}/${IMAGE}.xz"
 }
 
 function stage_01_base() {
@@ -655,4 +681,5 @@ function stage_04_corrections() {
 stage_01_base
 stage_02_desktop
 stage_03_raspi2
-#stage_04_corrections
+stage_04_corrections
+compress_image
