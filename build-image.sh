@@ -393,18 +393,20 @@ function install_software() {
         chroot $R apt-get -y install python-pip python3-pip
         chroot $R apt-get -y install python-setuptools python3-setuptools
 
-        # Python extras a Raspberry Pi hacker expects to have available ;-)
+        # Python extras a Raspberry Pi hacker expects to be available ;-)
         chroot $R apt-get -y install raspi-gpio
         chroot $R apt-get -y install python-rpi.gpio python3-rpi.gpio
+        chroot $R apt-get -y install python-gpiozero python3-gpiozero
         chroot $R apt-get -y install pigpio python-pigpio python3-pigpio
         chroot $R apt-get -y install python-serial python3-serial
         chroot $R apt-get -y install python-spidev python3-spidev
+        chroot $R apt-get -y install python-astropi python3-astropi
+        chroot $R apt-get -y install python-drumhat python3-drumhat
+        chroot $R apt-get -y install python-environhat python3-environhat
+        chroot $R apt-get -y install python-pianohat python3-pianohat
+        chroot $R apt-get -y install python-sense-hat python3-sense-hat
         chroot $R apt-get -y install python-picamera python3-picamera
         chroot $R apt-get -y install python-rtimulib python3-rtimulib
-        chroot $R apt-get -y install python-sense-hat python3-sense-hat
-        chroot $R apt-get -y install python-astropi python3-astropi
-        chroot $R apt-get -y install python-pil python3-pil
-        chroot $R apt-get -y install python-gpiozero python3-gpiozero
         chroot $R apt-get -y install python-pygame
         chroot $R pip2 install codebug_tether
         chroot $R pip3 install codebug_tether
