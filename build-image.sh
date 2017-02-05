@@ -404,6 +404,7 @@ function install_software() {
         chroot $R apt-get -y install python-drumhat python3-drumhat
         chroot $R apt-get -y install python-environhat python3-environhat
         chroot $R apt-get -y install python-pianohat python3-pianohat
+        chroot $R apt-get -y install python-rainbowhat python3-rainbowhat
         chroot $R apt-get -y install python-sense-hat python3-sense-hat
         chroot $R apt-get -y install python-picamera python3-picamera
         chroot $R apt-get -y install python-rtimulib python3-rtimulib
