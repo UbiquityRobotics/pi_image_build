@@ -355,10 +355,8 @@ EOM
     # Add /root partition resize
     if [ "${FS}" == "ext4" ]; then
         CMDLINE_INIT="init=/usr/lib/raspi-config/init_resize.sh"
-
-        # Add the first boot filesystem resize
-        mkdir -p $R/usr/lib/raspi-config/
-        cp files/init_resize.sh $R/usr/lib/raspi-config/
+        # Add the first boot filesystem resize, init_resize.sh is
+        # shipped in raspi-config.
         cp files/resize2fs_once	$R/etc/init.d/
         chroot $R /bin/systemctl enable resize2fs_once        
     else
