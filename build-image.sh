@@ -204,11 +204,12 @@ function prepare_oem_config() {
 }
 
 function configure_ssh() {
-    chroot $R apt-get -y install openssh-server
+    chroot $R apt-get -y install openssh-server sshguard
     cp files/sshdgenkeys.service $R/lib/systemd/system/
     mkdir -p $R/etc/systemd/system/ssh.service.wants
     chroot $R /bin/systemctl enable sshdgenkeys.service
     chroot $R /bin/systemctl disable ssh.service
+    chroot $R /bin/systemctl disable sshguard.service
 }
 
 function configure_network() {
