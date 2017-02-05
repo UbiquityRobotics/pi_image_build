@@ -14,7 +14,7 @@ case "$1" in
     log_daemon_msg "Starting resize2fs_once"
     ROOT_DEV=`grep -Eo 'root=[[:graph:]]+' /proc/cmdline | cut -d '=' -f 2-` &&
     resize2fs $ROOT_DEV &&
-    touch ./resized &&
+    touch /.resized &&
     update-rc.d resize2fs_once remove &&
     rm /etc/init.d/resize2fs_once &&
     log_end_msg $?
