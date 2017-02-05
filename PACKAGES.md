@@ -44,6 +44,15 @@ These are ported.
 
 These are pending.
 
+  * https://archive.raspberrypi.org/debian/pool/main/s/sense-emu/sense-emu_1.0.dsc
+  * https://archive.raspberrypi.org/debian/pool/main/p/pantilthat/pantilthat_0.0.2.dsc
+  * https://archive.raspberrypi.org/debian/pool/main/s/scrollphat/scrollphat_0.0.7.dsc
+  * https://archive.raspberrypi.org/debian/pool/main/p/piglow/piglow_1.2.4.dsc
+  * https://archive.raspberrypi.org/debian/pool/main/p/pgzero/pgzero_1.1-1.dsc
+  * https://archive.raspberrypi.org/debian/pool/main/s/st7036/st7036_1.4.3.dsc
+  * https://archive.raspberrypi.org/debian/pool/main/s/sn3218/sn3218_1.2.6.dsc
+
+
   * http://kusti8.github.io/RPi-chromium/
   * http://repozytorium.mati75.eu/raspbian/pool/main/c/chromium-browser/
   * http://repozytorium.mati75.eu/raspbian/pool/main/q/qt5ct/
