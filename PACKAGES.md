@@ -40,19 +40,21 @@ These are ported.
   * http://archive.raspberrypi.org/debian/pool/main/e/envirohat/
   * http://archive.raspberrypi.org/debian/pool/main/p/pianohat/
   * http://archive.raspberrypi.org/debian/pool/main/p/pigpio/
+  * http://archive.raspberrypi.org/debian/pool/main/s/sense-emu/
+  * http://archive.raspberrypi.org/debian/pool/main/p/pantilthat/
+  * http://archive.raspberrypi.org/debian/pool/main/s/scrollphat/
+  * http://archive.raspberrypi.org/debian/pool/main/p/piglow/
+  * http://archive.raspberrypi.org/debian/pool/main/s/st7036/
+  * http://archive.raspberrypi.org/debian/pool/main/s/sn3218/
+  * http://archive.raspberrypi.org/debian/pool/main/m/microdotphat/
+  * http://archive.raspberrypi.org/debian/pool/main/m/mote/
+  * http://archive.raspberrypi.org/debian/pool/main/m/motephat/
+  * http://archive.raspberrypi.org/debian/pool/main/e/explorerhat/
 
 
 These are pending.
 
-  * https://archive.raspberrypi.org/debian/pool/main/s/sense-emu/sense-emu_1.0.dsc
-  * https://archive.raspberrypi.org/debian/pool/main/p/pantilthat/pantilthat_0.0.2.dsc
-  * https://archive.raspberrypi.org/debian/pool/main/s/scrollphat/scrollphat_0.0.7.dsc
-  * https://archive.raspberrypi.org/debian/pool/main/p/piglow/piglow_1.2.4.dsc
-  * https://archive.raspberrypi.org/debian/pool/main/p/pgzero/pgzero_1.1-1.dsc
-  * https://archive.raspberrypi.org/debian/pool/main/s/st7036/st7036_1.4.3.dsc
-  * https://archive.raspberrypi.org/debian/pool/main/s/sn3218/sn3218_1.2.6.dsc
-
-
+  * https://archive.raspberrypi.org/debian/pool/main/p/pgzero/pgzero_1.1-1.dsc (Requires python3-pygame)
   * http://kusti8.github.io/RPi-chromium/
   * http://repozytorium.mati75.eu/raspbian/pool/main/c/chromium-browser/
   * http://repozytorium.mati75.eu/raspbian/pool/main/q/qt5ct/
