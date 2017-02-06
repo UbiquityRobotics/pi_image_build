@@ -58,7 +58,7 @@ function sync_to() {
 function bootstrap() {
     # Required tools
     apt-get -y install binfmt-support debootstrap f2fs-tools \
-    qemu-user-static rsync ubuntu-keyring wget whois
+    qemu-user-static rsync ubuntu-keyring whois
 
     # Use the same base system for all flavours.
     if [ ! -f "${R}/tmp/.bootstrap" ]; then
@@ -330,9 +330,8 @@ EOM
         fi
 
         # omxplayer
-        local OMX="http://omxplayer.sconde.net/builds/omxplayer_0.3.7~git20160923~dfea8c9_armhf.deb"
         # - Requires: libpcre3 libfreetype6 fonts-freefont-ttf dbus libssl1.0.0 libsmbclient libssh-4
-        wget -c "${OMX}" -O $R/tmp/omxplayer.deb
+        cp deb/omxplayer_0.3.7~git20160923~dfea8c9_armhf.deb $R/tmp/omxplayer.deb
         chroot $R apt-get -y install /tmp/omxplayer.deb
 
         # Make Ubiquity "compatible" with the Raspberry Pi Foundation kernel.
@@ -355,8 +354,7 @@ EOM
     # copies-and-fills
     # Create /spindel_install so cofi doesn't segfault when chrooted via qemu-user-static
     touch $R/spindle_install
-    local COFI="http://archive.raspberrypi.org/debian/pool/main/r/raspi-copies-and-fills/raspi-copies-and-fills_0.5-1_armhf.deb"
-    wget -c "${COFI}" -O $R/tmp/cofi.deb
+    cp deb/raspi-copies-and-fills_0.5-1_armhf.deb $R/tmp/cofi.deb
     chroot $R apt-get -y install /tmp/cofi.deb
 
     # Add /root partition resize
@@ -444,11 +442,9 @@ function install_software() {
 
         # Scratch (nuscratch)
         # - Requires: scratch and used to require wiringpi
-        local SCRATCH="http://archive.raspberrypi.org/debian/pool/main/s/scratch/scratch_1.4.20131203-2_all.deb"
-        local WIRINGPI="http://archive.raspberrypi.org/debian/pool/main/w/wiringpi/wiringpi_2.32_armhf.deb"
-        wget -c "${WIRINGPI}" -O $R/tmp/wiringpi.deb
+        cp deb/scratch_1.4.20131203-2_all.deb $R/tmp/wiringpi.deb
+        cp deb/wiringpi_2.32_armhf.deb $R/tmp/scratch.deb
         chroot $R apt-get -y install /tmp/wiringpi.deb
-        wget -c "${SCRATCH}" -O $R/tmp/scratch.deb
         chroot $R apt-get -y install /tmp/scratch.deb
         chroot $R apt-get -y install nuscratch
 
