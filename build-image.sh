@@ -404,11 +404,21 @@ function install_software() {
         chroot $R apt-get -y install python-drumhat python3-drumhat
         chroot $R apt-get -y install python-environhat python3-environhat
         chroot $R apt-get -y install python-pianohat python3-pianohat
+        chroot $R apt-get -y install python-pantilthat python3-pantilthat
+        chroot $R apt-get -y install python-scrollphat python3-scrollphat
+        chroot $R apt-get -y install python-st7036 python3-st7036
+        chroot $R apt-get -y install python-sn3218 python3-sn3218
+        chroot $R apt-get -y install python-piglow python3-piglow
+        chroot $R apt-get -y install python-microdotphat python3-microdotphat
+        chroot $R apt-get -y install python-mote python3-mote
+        chroot $R apt-get -y install python-motehat python3-motehat
+        chroot $R apt-get -y install python-explorerhat python3-explorerhat
         chroot $R apt-get -y install python-rainbowhat python3-rainbowhat
         chroot $R apt-get -y install python-sense-hat python3-sense-hat
         chroot $R apt-get -y install python-picamera python3-picamera
         chroot $R apt-get -y install python-rtimulib python3-rtimulib
         chroot $R apt-get -y install python-pygame
+        chroot $R apt-get -y install sense-emu
         chroot $R pip2 install codebug_tether
         chroot $R pip3 install codebug_tether
     fi
