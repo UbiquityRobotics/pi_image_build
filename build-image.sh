@@ -317,6 +317,11 @@ EOM
     cp -v firmware/* $R/lib/firmware/brcm/
     chown root:root $R/lib/firmware/brcm/*
 
+    # pi-top poweroff and brightness utilities
+    cp -v files/pi-top-* $R/usr/bin/
+    chown root:root $R/usr/bin/pi-top-*
+    chmod +x $R/usr/bin/pi-top-*
+
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
         # Install fbturbo drivers on non composited desktop OS
         # fbturbo causes VC4 to fail
