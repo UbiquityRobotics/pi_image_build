@@ -252,6 +252,11 @@ EOM
 }
 
 function disable_services() {
+    # Disable brltty because is hits SECCOMP errors
+    if [ -f $R/sbin/brltty ]; then
+        chroot $R /bin/systemctl disable brltty.service
+    fi
+
     # Disable ntp because systemd-timesyncd will take care of this.
     if [ -f $R/etc/init.d/ntp ]; then
         chroot $R /bin/systemctl disable ntp
@@ -331,7 +336,7 @@ EOM
 
         # omxplayer
         # - Requires: libpcre3 libfreetype6 fonts-freefont-ttf dbus libssl1.0.0 libsmbclient libssh-4
-        cp deb/omxplayer_0.3.7~git20160923~dfea8c9_armhf.deb $R/tmp/omxplayer.deb
+        cp deb/omxplayer_0.3.7-git20160923-dfea8c9_armhf.deb $R/tmp/omxplayer.deb
         chroot $R apt-get -y install /tmp/omxplayer.deb
 
         # Make Ubiquity "compatible" with the Raspberry Pi Foundation kernel.
@@ -341,15 +346,10 @@ EOM
     fi
 
     # Install Raspberry Pi system tweaks
-    chroot $R apt-get -y install fbset raspberrypi-general-mods raspberrypi-sys-mods
+    chroot $R apt-get -y install fbset raspberrypi-sys-mods
 
     # Enable hardware random number generator
     chroot $R apt-get -y install rng-tools
-
-    # Disable brltty because is hit SECCOMP errors
-    if [ -f $R/sbin/brltty ]; then
-        chroot $R /bin/systemctl disable brltty.service
-    fi
 
     # copies-and-fills
     # Create /spindel_install so cofi doesn't segfault when chrooted via qemu-user-static
@@ -407,6 +407,8 @@ function install_software() {
         chroot $R apt-get -y install pigpio python-pigpio python3-pigpio
         chroot $R apt-get -y install python-serial python3-serial
         chroot $R apt-get -y install python-spidev python3-spidev
+        chroot $R apt-get -y install python-smbus python3-smbus
+
         chroot $R apt-get -y install python-astropi python3-astropi
         chroot $R apt-get -y install python-drumhat python3-drumhat
         chroot $R apt-get -y install python-environhat python3-environhat
