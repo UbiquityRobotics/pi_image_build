@@ -252,7 +252,7 @@ EOM
 }
 
 function disable_services() {
-    # Disable brltty because is hits SECCOMP errors
+    # Disable brltty because it spams syslog with SECCOMP errors
     if [ -f $R/sbin/brltty ]; then
         chroot $R /bin/systemctl disable brltty.service
     fi
@@ -265,7 +265,7 @@ function disable_services() {
         chroot $R /bin/systemctl enable prefer-timesyncd.service
     fi
 
-    # Disable irqbalance because it is little, if any, benefit ARM.
+    # Disable irqbalance because it is of little, if any, benefit on ARM.
     if [ -f $R/etc/init.d/irqbalance ]; then
         chroot $R /bin/systemctl disable irqbalance
     fi
@@ -315,8 +315,8 @@ EOM
 
     # Firmware Kernel installation
     chroot $R apt-get -y install libraspberrypi-bin libraspberrypi-dev \
-    libraspberrypi-doc libraspberrypi0 raspberrypi-bootloader rpi-update
-    chroot $R apt-get -y install bluez-firmware linux-firmware pi-bluetooth
+    libraspberrypi-doc libraspberrypi0 raspberrypi-bootloader rpi-update \
+    bluez-firmware linux-firmware pi-bluetooth
 
     # Raspberry Pi 3 WiFi firmware. Supplements what is provided in linux-firmware
     cp -v firmware/* $R/lib/firmware/brcm/
@@ -394,40 +394,44 @@ EOM
 function install_software() {
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ]; then
+        # FIXME - Replace with meta packages(s)
+
         # Python
-        chroot $R apt-get -y install python-minimal python3-minimal
-        chroot $R apt-get -y install python-dev python3-dev
-        chroot $R apt-get -y install python-pip python3-pip
-        chroot $R apt-get -y install python-setuptools python3-setuptools
+        chroot $R apt-get -y install \
+        python-minimal python3-minimal \
+        python-dev python3-dev \
+        python-pip python3-pip \
+        python-setuptools python3-setuptools
 
         # Python extras a Raspberry Pi hacker expects to be available ;-)
-        chroot $R apt-get -y install raspi-gpio
-        chroot $R apt-get -y install python-rpi.gpio python3-rpi.gpio
-        chroot $R apt-get -y install python-gpiozero python3-gpiozero
-        chroot $R apt-get -y install pigpio python-pigpio python3-pigpio
-        chroot $R apt-get -y install python-serial python3-serial
-        chroot $R apt-get -y install python-spidev python3-spidev
-        chroot $R apt-get -y install python-smbus python3-smbus
+        chroot $R apt-get -y install \
+        raspi-gpio \
+        python-rpi.gpio python3-rpi.gpio \
+        python-gpiozero python3-gpiozero \
+        pigpio python-pigpio python3-pigpio \
+        python-serial python3-serial \
+        python-spidev python3-spidev \
+        python-smbus python3-smbus \
+        python-astropi python3-astropi \
+        python-drumhat python3-drumhat \
+        python-envirophat python3-envirophat \
+        python-pianohat python3-pianohat \
+        python-pantilthat python3-pantilthat \
+        python-scrollphat python3-scrollphat \
+        python-st7036 python3-st7036 \
+        python-sn3218 python3-sn3218 \
+        python-piglow python3-piglow \
+        python-microdotphat python3-microdotphat \
+        python-mote python3-mote \
+        python-motephat python3-motephat \
+        python-explorerhat python3-explorerhat \
+        python-rainbowhat python3-rainbowhat \
+        python-sense-hat python3-sense-hat \
+        python-sense-emu python3-sense-emu sense-emu-tools \
+        python-picamera python3-picamera \
+        python-rtimulib python3-rtimulib \
+        python-pygame
 
-        chroot $R apt-get -y install python-astropi python3-astropi
-        chroot $R apt-get -y install python-drumhat python3-drumhat
-        chroot $R apt-get -y install python-environhat python3-environhat
-        chroot $R apt-get -y install python-pianohat python3-pianohat
-        chroot $R apt-get -y install python-pantilthat python3-pantilthat
-        chroot $R apt-get -y install python-scrollphat python3-scrollphat
-        chroot $R apt-get -y install python-st7036 python3-st7036
-        chroot $R apt-get -y install python-sn3218 python3-sn3218
-        chroot $R apt-get -y install python-piglow python3-piglow
-        chroot $R apt-get -y install python-microdotphat python3-microdotphat
-        chroot $R apt-get -y install python-mote python3-mote
-        chroot $R apt-get -y install python-motehat python3-motehat
-        chroot $R apt-get -y install python-explorerhat python3-explorerhat
-        chroot $R apt-get -y install python-rainbowhat python3-rainbowhat
-        chroot $R apt-get -y install python-sense-hat python3-sense-hat
-        chroot $R apt-get -y install python-picamera python3-picamera
-        chroot $R apt-get -y install python-rtimulib python3-rtimulib
-        chroot $R apt-get -y install python-pygame
-        chroot $R apt-get -y install sense-emu
         chroot $R pip2 install codebug_tether
         chroot $R pip3 install codebug_tether
     fi
@@ -703,4 +707,4 @@ stage_01_base
 stage_02_desktop
 stage_03_raspi2
 stage_04_corrections
-compress_image
+#compress_image
