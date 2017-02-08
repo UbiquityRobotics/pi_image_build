@@ -46,7 +46,7 @@ These are ported.
   * http://archive.raspberrypi.org/debian/pool/main/p/piglow/
   * http://archive.raspberrypi.org/debian/pool/main/s/st7036/
   * http://archive.raspberrypi.org/debian/pool/main/s/sn3218/
-  * http://archive.raspberrypi.org/debian/pool/main/m/microdotphat/
+  * http://archive.raspberrypi.org/debian/pool/main/m/microdotphat/         (Needed python-mock adding to B-D)    
   * http://archive.raspberrypi.org/debian/pool/main/m/mote/
   * http://archive.raspberrypi.org/debian/pool/main/m/motephat/
   * http://archive.raspberrypi.org/debian/pool/main/e/explorerhat/
