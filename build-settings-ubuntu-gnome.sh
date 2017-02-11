@@ -23,7 +23,7 @@ FLAVOUR="ubuntu-gnome"
 FLAVOUR_NAME="Ubuntu GNOME"
 RELEASE="xenial"
 VERSION="16.04.2"
-QUALITY="-rc3"
+QUALITY=""
 
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"
