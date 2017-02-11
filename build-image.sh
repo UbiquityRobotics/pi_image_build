@@ -677,11 +677,15 @@ function stage_04_corrections() {
     R=${DEVICE_R}
     mount_system
 
-    # Add the MATE Desktop PPA for Xenial
-    if [ "${RELEASE}" == "xenial" ] && [ "${FLAVOUR}" == "ubuntu-mate" ]; then
+    if [ "${RELEASE}" == "xenial" ]; then
+      chroot $R apt-get install -y --install-recommends xserver-xorg-hwe-16.04
+
+      # Add the MATE Desktop PPA for Xenial
+      if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
         chroot $R apt-add-repository -y ppa:ubuntu-mate-dev/xenial-mate
         chroot $R apt-get update
         chroot $R apt-get -y dist-upgrade
+      fi
     fi
 
     # Insert other corrections here.
