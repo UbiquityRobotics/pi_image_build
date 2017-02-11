@@ -678,6 +678,14 @@ function stage_04_corrections() {
     mount_system
 
     if [ "${RELEASE}" == "xenial" ]; then
+      # Add the MATE Desktop PPA for Xenial
+      if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
+        chroot $R apt-add-repository -y ppa:ubuntu-mate-dev/xenial-mate
+        chroot $R apt-get update
+        chroot $R apt-get -y dist-upgrade
+      fi
+
+      # Upgrade Xorg using HWE.
       chroot $R apt-get install -y --install-recommends \
       xserver-xorg-core-hwe-16.04 \
       xserver-xorg-input-all-hwe-16.04 \
@@ -687,13 +695,6 @@ function stage_04_corrections() {
       xserver-xorg-video-all-hwe-16.04 \
       xserver-xorg-video-fbdev-hwe-16.04 \
       xserver-xorg-video-vesa-hwe-16.04
-
-      # Add the MATE Desktop PPA for Xenial
-      if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-        chroot $R apt-add-repository -y ppa:ubuntu-mate-dev/xenial-mate
-        chroot $R apt-get update
-        chroot $R apt-get -y dist-upgrade
-      fi
     fi
 
     # Insert other corrections here.
