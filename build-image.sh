@@ -366,14 +366,10 @@ function configure_hardware() {
     cp files/config.txt $R/boot/
 
     # Add /boot/cmdline.txt
-    if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
-        echo "net.ifnames=0 biosdevname=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/cmdline.txt
-    else
-        echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/cmdline.txt
-        # Enable VC4 on composited desktops
-        if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
-            echo "dtoverlay=vc4-kms-v3d" >> $R/boot/config.txt
-        fi
+    echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/cmdline.txt
+    # Enable VC4 on composited desktops
+    if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
+        echo "dtoverlay=vc4-kms-v3d" >> $R/boot/config.txt
     fi
 
     # Set up fstab
