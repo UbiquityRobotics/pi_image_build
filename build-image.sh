@@ -253,12 +253,12 @@ EOM
 
 function disable_services() {
     # Disable brltty because it spams syslog with SECCOMP errors
-    if [ -f $R/sbin/brltty ]; then
+    if [ -e $R/sbin/brltty ]; then
         chroot $R /bin/systemctl disable brltty.service
     fi
 
     # Disable ntp because systemd-timesyncd will take care of this.
-    if [ -f $R/etc/init.d/ntp ]; then
+    if [ -e $R/etc/init.d/ntp ]; then
         chroot $R /bin/systemctl disable ntp
         chmod -x $R/usr/sbin/ntpd
         cp files/prefer-timesyncd.service $R/lib/systemd/system/
@@ -266,27 +266,32 @@ function disable_services() {
     fi
 
     # Disable irqbalance because it is of little, if any, benefit on ARM.
-    if [ -f $R/etc/init.d/irqbalance ]; then
+    if [ -e $R/etc/init.d/irqbalance ]; then
         chroot $R /bin/systemctl disable irqbalance
     fi
 
     # Disable TLP because it is redundant on ARM devices.
-    if [ -f $R/etc/default/tlp ]; then
+    if [ -e $R/etc/default/tlp ]; then
         sed -i s'/TLP_ENABLE=1/TLP_ENABLE=0/' $R/etc/default/tlp
         chroot $R /bin/systemctl disable tlp.service
         chroot $R /bin/systemctl disable tlp-sleep.service
     fi
 
     # Disable apport because these images are not official
-    if [ -f $R/etc/default/apport ]; then
+    if [ -e $R/etc/default/apport ]; then
         sed -i s'/enabled=1/enabled=0/' $R/etc/default/apport
         chroot $R /bin/systemctl disable apport.service
         chroot $R /bin/systemctl disable apport-forward.socket
     fi
 
     # Disable whoopsie because these images are not official
-    if [ -f $R/usr/bin/whoopsie ]; then
+    if [ -e $R/usr/bin/whoopsie ]; then
         chroot $R /bin/systemctl disable whoopsie.service
+    fi
+
+    # Disable mate-optimus
+    if [ -e $R/usr/share/mate/autostart/mate-optimus.desktop ]; then
+        rm -f $R/usr/share/mate/autostart/mate-optimus.desktop || true
     fi
 }
 
