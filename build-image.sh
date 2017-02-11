@@ -304,18 +304,6 @@ function configure_hardware() {
 
     # Install the RPi PPA
     chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
-    chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/crazy-pi
-
-    cat <<EOM >$R/etc/apt/preferences.d/ubuntu-pi-flavour-maker
-Package: *
-Pin: release o=LP-PPA-ubuntu-pi-flavour-makers-crazy-pi
-Pin-Priority: 991
-
-Package: *
-Pin: release o=LP-PPA-ubuntu-pi-flavour-makers-ppa
-Pin-Priority: 990
-EOM
-
     chroot $R apt-get update
 
     # Firmware Kernel installation
