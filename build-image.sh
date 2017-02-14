@@ -24,6 +24,12 @@ if [ $(id -u) -ne 0 ]; then
     exit 1
 fi
 
+if [ -n "$LOCAL_MIRROR" ]; then
+  MIRROR=$LOCAL_MIRROR
+else
+  MIRROR=http://ports.ubuntu.com/
+fi
+
 # Mount host system
 function mount_system() {
     # In case this is a re-run move the cofi preload out of the way
@@ -63,13 +69,14 @@ function bootstrap() {
     # Use the same base system for all flavours.
     if [ ! -f "${R}/tmp/.bootstrap" ]; then
         if [ "${ARCH}" == "armv7l" ]; then
-            debootstrap --verbose $RELEASE $R http://ports.ubuntu.com/
+            debootstrap --verbose $RELEASE $R $MIRROR
         else
-            qemu-debootstrap --verbose --arch=armhf $RELEASE $R http://ports.ubuntu.com/
+            qemu-debootstrap --verbose --arch=armhf $RELEASE $R $MIRROR
         fi
         touch "$R/tmp/.bootstrap"
     fi
 }
+
 
 function generate_locale() {
     for LOCALE in $(chroot $R locale | cut -d'=' -f2 | grep -v : | sed 's/"//g' | uniq); do
@@ -82,17 +89,17 @@ function generate_locale() {
 # Set up initial sources.list
 function apt_sources() {
     cat <<EOM >$R/etc/apt/sources.list
-deb http://ports.ubuntu.com/ ${RELEASE} main restricted universe multiverse
-deb-src http://ports.ubuntu.com/ ${RELEASE} main restricted universe multiverse
+deb ${MIRROR} ${RELEASE} main restricted universe multiverse
+#deb-src ${MIRROR} ${RELEASE} main restricted universe multiverse
 
-deb http://ports.ubuntu.com/ ${RELEASE}-updates main restricted universe multiverse
-deb-src http://ports.ubuntu.com/ ${RELEASE}-updates main restricted universe multiverse
+deb ${MIRROR} ${RELEASE}-updates main restricted universe multiverse
+#deb-src ${MIRROR} ${RELEASE}-updates main restricted universe multiverse
 
-deb http://ports.ubuntu.com/ ${RELEASE}-security main restricted universe multiverse
-deb-src http://ports.ubuntu.com/ ${RELEASE}-security main restricted universe multiverse
+deb ${MIRROR} ${RELEASE}-security main restricted universe multiverse
+#deb-src ${MIRROR} ${RELEASE}-security main restricted universe multiverse
 
-deb http://ports.ubuntu.com/ ${RELEASE}-backports main restricted universe multiverse
-deb-src http://ports.ubuntu.com/ ${RELEASE}-backports main restricted universe multiverse
+deb ${MIRROR} ${RELEASE}-backports main restricted universe multiverse
+#deb-src ${MIRROR} ${RELEASE}-backports main restricted universe multiverse
 EOM
 }
 
@@ -102,6 +109,19 @@ function apt_upgrade() {
 }
 
 function apt_clean() {
+    cat <<EOM >$R/etc/apt/sources.list
+deb http://ports.ubuntu.com ${RELEASE} main restricted universe multiverse
+deb-src http://ports.ubuntu.com  ${RELEASE} main restricted universe multiverse
+
+deb http://ports.ubuntu.com ${RELEASE}-updates main restricted universe multiverse
+deb-src http://ports.ubuntu.com  ${RELEASE}-updates main restricted universe multiverse
+
+deb http://ports.ubuntu.com ${RELEASE}-security main restricted universe multiverse
+deb-src http://ports.ubuntu.com  ${RELEASE}-security main restricted universe multiverse
+
+deb http://ports.ubuntu.com ${RELEASE}-backports main restricted universe multiverse
+deb-src http://ports.ubuntu.com ${RELEASE}-backports main restricted universe multiverse
+EOM
     chroot $R apt-get -y autoremove
     chroot $R apt-get clean
 }
@@ -625,6 +645,7 @@ function stage_01_base() {
 function stage_02_desktop() {
     R="${DESKTOP_R}"
     mount_system
+    apt_sources
 
     if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
         echo "Skipping desktop install for ${FLAVOUR}"
@@ -664,6 +685,7 @@ function stage_02_desktop() {
 function stage_03_raspi2() {
     R=${DEVICE_R}
     mount_system
+    apt_sources
     configure_hardware ${FS_TYPE}
     install_software
     apt_upgrade
@@ -676,6 +698,7 @@ function stage_03_raspi2() {
 function stage_04_corrections() {
     R=${DEVICE_R}
     mount_system
+    apt_sources
 
     if [ "${RELEASE}" == "xenial" ]; then
       # Add the MATE Desktop PPA for Xenial
