@@ -37,8 +37,10 @@ FS_SIZE=5
 MAKE_TARBALL=0
 
 TARBALL="${FLAVOUR}-${VERSION}${QUALITY}-desktop-armhf-rootfs.tar.bz2"
-IMAGE="${FLAVOUR}-${VERSION}${QUALITY}-ubiquity-xenial-lxde-raspberry-pi.img"
-BASEDIR=${HOME}/PiFlavourMaker/${RELEASE}
+TIMESTAMP=$(date +%Y-%m-%d)	
+IMAGE="${TIMESTAMP}-ubiquity-xenial-lxde-raspberry-pi.img"
+IMAGEDIR=/image-builds/final-images/
+BASEDIR=/image-builds/PiFlavourMaker/${RELEASE}
 BUILDDIR=${BASEDIR}/${FLAVOUR}
 BASE_R=${BASEDIR}/base
 DESKTOP_R=${BUILDDIR}/desktop
