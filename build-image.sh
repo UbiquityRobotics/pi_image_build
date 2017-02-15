@@ -253,7 +253,7 @@ function configure_ssh() {
     cp files/sshdgenkeys.service $R/lib/systemd/system/
     mkdir -p $R/etc/systemd/system/ssh.service.wants
     chroot $R /bin/systemctl enable sshdgenkeys.service
-    chroot $R /bin/systemctl disable ssh.service
+    # chroot $R /bin/systemctl disable ssh.service
     chroot $R /bin/systemctl disable sshguard.service
 }
 
@@ -266,7 +266,7 @@ function configure_network() {
 ff02::1         ip6-allnodes
 ff02::2         ip6-allrouters
 
-127.0.1.1       ${FLAVOUR}
+127.0.1.1       ${FLAVOUR} ${FLAVOUR}.local
 EOM
 
     # Set up interfaces
