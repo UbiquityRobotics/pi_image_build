@@ -30,6 +30,12 @@ else
   MIRROR=http://ports.ubuntu.com/
 fi
 
+if [ -n "$LOCAL_ROS_MIRROR" ]; then
+  ROS_MIRROR=$LOCAL_ROS_MIRROR
+else
+  ROS_MIRROR=http://packages.ros.org/ros/ubuntu
+fi
+
 # Mount host system
 function mount_system() {
     # In case this is a re-run move the cofi preload out of the way
@@ -101,6 +107,10 @@ deb ${MIRROR} ${RELEASE}-security main restricted universe multiverse
 deb ${MIRROR} ${RELEASE}-backports main restricted universe multiverse
 #deb-src ${MIRROR} ${RELEASE}-backports main restricted universe multiverse
 EOM
+
+    cat <<EOM >$R/etc/apt/sources.list.d/ros-latest.list
+deb ${ROS_MIRROR} xenial main
+EOM
 }
 
 function apt_upgrade() {
@@ -122,6 +132,10 @@ deb-src http://ports.ubuntu.com  ${RELEASE}-security main restricted universe mu
 deb http://ports.ubuntu.com ${RELEASE}-backports main restricted universe multiverse
 deb-src http://ports.ubuntu.com ${RELEASE}-backports main restricted universe multiverse
 EOM
+
+    cat <<EOM >$R/etc/apt/sources.list.d/ros-latest.list
+deb http://packages.ros.org/ros/ubuntu xenial main
+EOM
     chroot $R apt-get -y autoremove
     chroot $R apt-get clean
 }
@@ -142,6 +156,17 @@ function ubuntu_standard() {
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ ! -f "${R}/tmp/.standard" ]; then
         chroot $R apt-get -y install ubuntu-standard
         touch "${R}/tmp/.standard"
+    fi
+}
+
+function ros_packages() {
+    if [ "${QUALITY}" == "ros" ]; then
+        wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | chroot $R apt-key add -
+        chroot $R apt-get update
+        chroot $R apt-get -y install ros-kinetic-desktop
+
+        chroot $R apt-get -y install ros-kinetic-ubiquity-motor
+        chroot $R apt-get -y install ros-kinetic-fiducials
     fi
 }
 
@@ -269,6 +294,26 @@ auto eth0
 iface eth0 inet dhcp
 EOM
     fi
+}
+
+function configure_ros() {
+    chroot $R apt-get -y install python-rosinstall
+    chroot $R rosdep init
+    # Yes we want to run it as root too
+    chroot $R rosdep update
+    echo "source /opt/ros/kinetic/setup.bash" >> $R/home/${USERNAME}/.bashrc
+    chroot $R su ubuntu -c "mkdir -p /home/${USERNAME}/catkin_ws/src"
+
+    # It doesn't exsist yet, but we are sourcing it in anyway
+    echo "source /home/${USERNAME}/catkin_ws/devel/setup.bash" >> $R/home/${USERNAME}/.bashrc
+    chroot $R su ubuntu -c "rosdep update"
+
+    chroot $R wget -O /home/${USERNAME}/catkin_ws/magni.rosinstall https://raw.githubusercontent.com/UbiquityRobotics/magni_robot/indigo-devel/magni.rosinstall
+    chroot $R su ubuntu -c "cd /home/${USERNAME}/catkin_ws; wstool init src /home/${USERNAME}/catkin_ws/magni.rosinstall"
+    chroot $R sh -c "cd /home/${USERNAME}/catkin_ws; rosdep install --from-paths src --ignore-src --rosdistro=kinetic -y"
+
+    # Make sure that permissions are still sane
+    chroot $R chown -R ubuntu:ubuntu /home/ubuntu
 }
 
 function disable_services() {
@@ -637,6 +682,7 @@ function stage_01_base() {
     apt_upgrade
     ubuntu_minimal
     ubuntu_standard
+    ros_packages
     apt_clean
     umount_system
     sync_to "${DESKTOP_R}"
@@ -673,6 +719,7 @@ function stage_02_desktop() {
     prepare_oem_config
     configure_ssh
     configure_network
+    configure_ros
     disable_services
     apt_upgrade
     apt_clean
