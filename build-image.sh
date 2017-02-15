@@ -160,14 +160,12 @@ function ubuntu_standard() {
 }
 
 function ros_packages() {
-    if [ "${QUALITY}" == "ros" ]; then
-        wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | chroot $R apt-key add -
-        chroot $R apt-get update
-        chroot $R apt-get -y install ros-kinetic-desktop
+    wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | chroot $R apt-key add -
+    chroot $R apt-get update
+    chroot $R apt-get -y install ros-kinetic-desktop
 
-        chroot $R apt-get -y install ros-kinetic-ubiquity-motor
-        chroot $R apt-get -y install ros-kinetic-fiducials
-    fi
+    chroot $R apt-get -y install ros-kinetic-ubiquity-motor
+    chroot $R apt-get -y install ros-kinetic-fiducials
 }
 
 # Install meta packages
