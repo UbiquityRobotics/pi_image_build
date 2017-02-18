@@ -474,7 +474,7 @@
 ##
 ##     Default 0
 ##
-#start_x=0
+start_x=1
 
 ## disable_camera_led
 ##     Turn off the red camera led when recording video or taking a still
@@ -521,7 +521,7 @@
 ##
 ##     Default 64
 ##
-#gpu_mem=128
+gpu_mem=128
 
 ## gpu_mem_256
 ##     GPU memory allocation in MB for 256MB board revision.
@@ -1198,3 +1198,5 @@ dtparam=audio=on
 #dtoverlay=lirc-rpi
 
 # Additional overlays and parameters are documented /boot/overlays/README
+dtoverlay=pi3-miniuart-bt
+dtoverlay=i2c-rtc,mcp7940x

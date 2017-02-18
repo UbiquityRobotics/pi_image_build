@@ -216,7 +216,7 @@ function create_user() {
         chroot $R addgroup --gid 29999 oem
         chroot $R adduser --gecos "OEM Configuration (temporary user)" --add_extra_groups --disabled-password --gid 29999 --uid 29999 ${USERNAME}
     else
-        chroot $R adduser --gecos "${FLAVOUR_NAME}" --add_extra_groups --disabled-password ${USERNAME}
+        chroot $R adduser --gecos "Ubuntu User" --add_extra_groups --disabled-password ${USERNAME}
     fi
     chroot $R usermod -a -G sudo -p ${PASSWD} ${USERNAME}
 }
@@ -427,6 +427,22 @@ function configure_hardware() {
 
     # Add /boot/config.txt
     cp files/config.txt $R/boot/
+
+    cat <<EOM >$R/etc/systemd/system/hwclock-sync.service 
+[Unit] 
+Description=Time Synchronisation from RTC Source 
+After=systemd-modules-load.service 
+RequiresMountsFor=/dev/rtc 
+Conflicts=shutdown.target 
+[Service] 
+Type=oneshot 
+ExecStart=/sbin/hwclock -s 
+TimeoutSec=0 
+[Install] 
+WantedBy=time-sync.target 
+EOM 
+
+    chroot $R /bin/systemctl enable hwclock-sync.service
 
     # Add /boot/cmdline.txt
     echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/cmdline.txt
