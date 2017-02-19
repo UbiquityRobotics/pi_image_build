@@ -605,20 +605,20 @@ function make_raspi2_image() {
     fi
 
     # Remove old images.
-    rm -f "${IMAGEDIR}/${IMAGE}" || true
+    rm -f "${BASEDIR}/${IMAGE}" || true
 
     # Create an empty file file.
-    dd if=/dev/zero of="${IMAGEDIR}/${IMAGE}" bs=1MB count=1
-    dd if=/dev/zero of="${IMAGEDIR}/${IMAGE}" bs=1MB count=0 seek=$(( ${SIZE_IMG} * 1000 ))
+    dd if=/dev/zero of="${BASEDIR}/${IMAGE}" bs=1MB count=1
+    dd if=/dev/zero of="${BASEDIR}/${IMAGE}" bs=1MB count=0 seek=$(( ${SIZE_IMG} * 1000 ))
 
     # Initialising: msdos
-    parted -s ${IMAGEDIR}/${IMAGE} mktable msdos
+    parted -s ${BASEDIR}/${IMAGE} mktable msdos
     echo "Creating /boot partition"
-    parted -a optimal -s ${IMAGEDIR}/${IMAGE} mkpart primary fat32 1 "${SIZE_BOOT}"
+    parted -a optimal -s ${BASEDIR}/${IMAGE} mkpart primary fat32 1 "${SIZE_BOOT}"
     echo "Creating /root partition"
-    parted -a optimal -s ${IMAGEDIR}/${IMAGE} mkpart primary ext4 "${SIZE_BOOT}" 100%
+    parted -a optimal -s ${BASEDIR}/${IMAGE} mkpart primary ext4 "${SIZE_BOOT}" 100%
 
-    PARTED_OUT=$(parted -s ${IMAGEDIR}/${IMAGE} unit b print)
+    PARTED_OUT=$(parted -s ${BASEDIR}/${IMAGE} unit b print)
     BOOT_OFFSET=$(echo "${PARTED_OUT}" | grep -e '^ 1'| xargs echo -n \
     | cut -d" " -f 2 | tr -d B)
     BOOT_LENGTH=$(echo "${PARTED_OUT}" | grep -e '^ 1'| xargs echo -n \
@@ -629,8 +629,8 @@ function make_raspi2_image() {
     ROOT_LENGTH=$(echo "${PARTED_OUT}" | grep -e '^ 2'| xargs echo -n \
     | cut -d" " -f 4 | tr -d B)
 
-    BOOT_LOOP=$(losetup --show -f -o ${BOOT_OFFSET} --sizelimit ${BOOT_LENGTH} ${IMAGEDIR}/${IMAGE})
-    ROOT_LOOP=$(losetup --show -f -o ${ROOT_OFFSET} --sizelimit ${ROOT_LENGTH} ${IMAGEDIR}/${IMAGE})
+    BOOT_LOOP=$(losetup --show -f -o ${BOOT_OFFSET} --sizelimit ${BOOT_LENGTH} ${BASEDIR}/${IMAGE})
+    ROOT_LOOP=$(losetup --show -f -o ${ROOT_OFFSET} --sizelimit ${ROOT_LENGTH} ${BASEDIR}/${IMAGE})
     echo "/boot: offset ${BOOT_OFFSET}, length ${BOOT_LENGTH}"
     echo "/:     offset ${ROOT_OFFSET}, length ${ROOT_LENGTH}"
 
@@ -673,18 +673,18 @@ function make_hash() {
 
 function make_tarball() {
     if [ ${MAKE_TARBALL} -eq 1 ]; then
-        rm -f "${IMAGEDIR}/${TARBALL}" || true
-        tar -cSf "${IMAGEDIR}/${TARBALL}" $R
-        make_hash "${IMAGEDIR}/${TARBALL}"
+        rm -f "${BASEDIR}/${TARBALL}" || true
+        tar -cSf "${BASEDIR}/${TARBALL}" $R
+        make_hash "${BASEDIR}/${TARBALL}"
     fi
 }
 
 function compress_image() {
     if [ ! -e "${BASEDIR}/${IMAGE}.xz" ]; then
-        echo "Compressing to: ${IMAGEDIR}/${IMAGE}.xz"
-        xz ${IMAGEDIR}/${IMAGE}
+        echo "Compressing to: ${BASEDIR}/${IMAGE}.xz"
+        xz ${BASEDIR}/${IMAGE}
     fi
-    make_hash "${IMAGEDIR}/${IMAGE}.xz"
+    make_hash "${BASEDIR}/${IMAGE}.xz"
 }
 
 function stage_01_base() {
