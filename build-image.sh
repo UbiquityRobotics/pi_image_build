@@ -440,12 +440,12 @@ ExecStart=/sbin/hwclock -s
 TimeoutSec=0 
 [Install] 
 WantedBy=time-sync.target 
-EOM 
+EOM
 
     chroot $R /bin/systemctl enable hwclock-sync.service
 
     # Add /boot/cmdline.txt
-    echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/cmdline.txt
+    echo "dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/cmdline.txt
     # Enable VC4 on composited desktops
     if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
         echo "dtoverlay=vc4-kms-v3d" >> $R/boot/config.txt
