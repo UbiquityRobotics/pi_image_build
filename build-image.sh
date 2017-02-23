@@ -570,9 +570,9 @@ function clean_up() {
     rm -f $R/root/.ssh/known_hosts
 
     # Remove bogus home directory
-    if [ -d $R/home/${SUDO_USER} ]; then
-        rm -rf $R/home/${SUDO_USER} || true
-    fi
+    # if [ -d $R/home/${SUDO_USER} ]; then
+    #     rm -rf $R/home/${SUDO_USER} || true
+    # fi
 
     # Machine-specific, so remove in case this system is going to be
     # cloned.  These will be regenerated on the first boot.
@@ -680,7 +680,7 @@ function make_tarball() {
 }
 
 function compress_image() {
-    if [ ! -e "${BASEDIR}/${IMAGE}.xz" ]; then
+    if [ ! -e "${IMAGEDIR}/${IMAGE}.xz" ]; then
         echo "Compressing to: ${IMAGEDIR}/${IMAGE}.xz"
         xz ${IMAGEDIR}/${IMAGE}
     fi
