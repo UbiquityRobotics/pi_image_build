@@ -466,7 +466,7 @@ function install_software() {
 
         # Install some useful utils
         chroot $R apt-get -y install \
-        vim nano pico emacs htop
+        vim nano emacs htop
 
         # Python
         chroot $R apt-get -y install \
