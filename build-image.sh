@@ -464,6 +464,10 @@ function install_software() {
     if [ "${FLAVOUR}" != "ubuntu-minimal" ]; then
         # FIXME - Replace with meta packages(s)
 
+        # Install some useful utils
+        chroot $R apt-get -y install \
+        vim nano pico emacs htop
+
         # Python
         chroot $R apt-get -y install \
         python-minimal python3-minimal \
