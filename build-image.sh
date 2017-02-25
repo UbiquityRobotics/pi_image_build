@@ -297,6 +297,11 @@ EOM
 function configure_ros() {
     chroot $R apt-get -y install python-rosinstall
     chroot $R rosdep init
+    # Overlay that has our custom dependencies
+    cat <<EOM >$R/etc/ros/rosdep/sources.list.d/30-ubiquity.list
+yaml https://raw.githubusercontent.com/UbiquityRobotics/rosdep/master/raspberry-pi.yaml
+EOM
+
     # Yes we want to run it as root too
     chroot $R rosdep update
     echo "source /opt/ros/kinetic/setup.bash" >> $R/home/${USERNAME}/.bashrc
