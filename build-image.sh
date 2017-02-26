@@ -111,7 +111,7 @@ EOM
     cat <<EOM >$R/etc/apt/sources.list.d/ros-latest.list
 deb ${ROS_MIRROR} xenial main
 EOM
-    cat <<EOM >$R/etc/apt/sources.list.d/ros-latest.list
+    cat <<EOM >$R/etc/apt/sources.list.d/ubiquity-latest.list
 deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity xenial main
 EOM
 }
