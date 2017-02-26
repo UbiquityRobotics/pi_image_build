@@ -300,7 +300,7 @@ EOM
 }
 
 function configure_ros() {
-    chroot $R apt-get -y install python-rosinstall
+    chroot $R apt-get -y install python-rosinstall python-wstool
     chroot $R rosdep init
     # Overlay that has our custom dependencies
     cat <<EOM >$R/etc/ros/rosdep/sources.list.d/30-ubiquity.list
@@ -319,7 +319,7 @@ EOM
     chroot $R wget -O /home/${USERNAME}/catkin_ws/magni.rosinstall https://raw.githubusercontent.com/UbiquityRobotics/magni_robot/indigo-devel/magni.rosinstall
     chroot $R su ubuntu -c "cd /home/${USERNAME}/catkin_ws; wstool init src /home/${USERNAME}/catkin_ws/magni.rosinstall"
     chroot $R sh -c "cd /home/${USERNAME}/catkin_ws; rosdep install --from-paths src --ignore-src --rosdistro=kinetic -y"
-
+    
     # Make sure that permissions are still sane
     chroot $R chown -R ubuntu:ubuntu /home/ubuntu
 }
