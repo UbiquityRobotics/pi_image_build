@@ -111,6 +111,9 @@ EOM
     cat <<EOM >$R/etc/apt/sources.list.d/ros-latest.list
 deb ${ROS_MIRROR} xenial main
 EOM
+    cat <<EOM >$R/etc/apt/sources.list.d/ros-latest.list
+deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity xenial main
+EOM
 }
 
 function apt_upgrade() {
@@ -161,6 +164,8 @@ function ubuntu_standard() {
 
 function ros_packages() {
     wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | chroot $R apt-key add -
+    chroot $R apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key C3032ED8
+
     chroot $R apt-get update
     chroot $R apt-get -y install ros-kinetic-desktop
 
@@ -465,6 +470,9 @@ EOM
 }
 
 function install_software() {
+
+    # Raspicam needs to be after configure_hardware
+    chroot $R apt-get -y install ros-kinetic-raspicam-node
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ]; then
         # FIXME - Replace with meta packages(s)
