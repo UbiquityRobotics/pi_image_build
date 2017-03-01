@@ -322,7 +322,7 @@ EOM
     
     # Make sure that permissions are still sane
     chroot $R chown -R ubuntu:ubuntu /home/ubuntu
-    chroot $R su ubuntu -c "cd /home/${USERNAME}/catkin_ws; catkin_make;"
+    chroot $R su ubuntu -c "bash -c 'cd /home/${USERNAME}/catkin_ws; source /opt/ros/kinetic/setup.bash; catkin_make;'"
 }
 
 function disable_services() {
