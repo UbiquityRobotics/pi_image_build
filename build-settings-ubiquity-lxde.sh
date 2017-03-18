@@ -51,5 +51,5 @@ export TZ=UTC
 USERNAME="ubuntu"
 OEM_CONFIG=0
 
-LOCAL_MIRROR=http://10.65.53.100/mirrors/ubuntu/
-LOCAL_ROS_MIRROR=http://10.65.53.100/mirrors/ros/
+LOCAL_MIRROR=http://10.53.100.51/mirrors/ubuntu/
+LOCAL_ROS_MIRROR=http://10.53.100.51/mirrors/ros/
