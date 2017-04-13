@@ -724,6 +724,7 @@ function stage_02_desktop() {
     R="${DESKTOP_R}"
     mount_system
     apt_sources
+    chroot $R apt-get update
 
     if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
         echo "Skipping desktop install for ${FLAVOUR}"
@@ -765,6 +766,7 @@ function stage_03_raspi2() {
     R=${DEVICE_R}
     mount_system
     apt_sources
+    chroot $R apt-get update
     configure_hardware ${FS_TYPE}
     install_software
     apt_upgrade
