@@ -164,7 +164,7 @@ function ubuntu_standard() {
 
 function ros_packages() {
     wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | chroot $R apt-key add -
-    chroot $R apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key C3032ED8
+    chroot $R apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv-key C3032ED8
 
     chroot $R apt-get update
     chroot $R apt-get -y install ros-kinetic-desktop
