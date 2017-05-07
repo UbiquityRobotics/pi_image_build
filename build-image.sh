@@ -111,9 +111,6 @@ EOM
     cat <<EOM >$R/etc/apt/sources.list.d/ros-latest.list
 deb ${ROS_MIRROR} xenial main
 EOM
-    cat <<EOM >$R/etc/apt/sources.list.d/ubiquity-latest.list
-deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity xenial main
-EOM
 }
 
 function apt_upgrade() {
@@ -300,12 +297,18 @@ EOM
 }
 
 function configure_ros() {
-    chroot $R apt-get -y install python-rosinstall python-wstool
+    chroot $R apt-get -y install python-rosinstall python-wstool apt-transport-https
     chroot $R rosdep init
     # Overlay that has our custom dependencies
     cat <<EOM >$R/etc/ros/rosdep/sources.list.d/30-ubiquity.list
 yaml https://raw.githubusercontent.com/UbiquityRobotics/rosdep/master/raspberry-pi.yaml
 EOM
+    
+    # Add the apt repo that has some binary builds
+    cat <<EOM >$R/etc/apt/sources.list.d/ubiquity-latest.list
+deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity xenial main
+EOM
+    chroot $R apt-get update
 
     # Yes we want to run it as root too
     chroot $R rosdep update
