@@ -52,4 +52,4 @@ USERNAME="ubuntu"
 OEM_CONFIG=0
 
 LOCAL_MIRROR=http://mirrors.mit.edu/ubuntu-ports/
-LOCAL_ROS_MIRROR=http://packages.ros.org/
+LOCAL_ROS_MIRROR=http://packages.ros.org/ros/ubuntu/
