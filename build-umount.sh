@@ -36,4 +36,5 @@ for R in $BASE_R $DESKTOP_R $DEVICE_R; do
     umount -l $R/sys
     umount -l $R/dev/pts
     umount -l $R/dev
+    umount -l $R/dev/shm
 done
