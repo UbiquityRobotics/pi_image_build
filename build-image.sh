@@ -46,6 +46,7 @@ function mount_system() {
     mount -t sysfs none $R/sys
     mount -o bind /dev $R/dev
     mount -o bind /dev/pts $R/dev/pts
+    mount -o bind /dev/shm $R/dev/shm
     echo "nameserver 8.8.8.8" > $R/etc/resolv.conf
 }
 
@@ -316,7 +317,7 @@ EOM
     echo "source /home/${USERNAME}/catkin_ws/devel/setup.bash" >> $R/home/${USERNAME}/.bashrc
     chroot $R su ubuntu -c "rosdep update"
 
-    chroot $R su ubuntu -c "cd /home/${USERNAME}/catkin_ws; git clone https://github.com/UbiquityRobotics/demos.git"
+    chroot $R su ubuntu -c "cd /home/${USERNAME}/catkin_ws/src; git clone https://github.com/UbiquityRobotics/demos.git"
     chroot $R sh -c "cd /home/${USERNAME}/catkin_ws; rosdep install --from-paths src --ignore-src --rosdistro=kinetic -y"
     
     # Make sure that permissions are still sane
