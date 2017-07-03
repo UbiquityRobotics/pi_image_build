@@ -166,8 +166,7 @@ function ros_packages() {
     chroot $R apt-get update
     chroot $R apt-get -y install ros-kinetic-desktop
 
-    chroot $R apt-get -y install ros-kinetic-ubiquity-motor
-    chroot $R apt-get -y install ros-kinetic-fiducials
+    chroot $R apt-get -y install ros-kinetic-magni-robot
 }
 
 # Install meta packages
@@ -310,8 +309,6 @@ deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity xenial main
 EOM
     chroot $R apt-get update
 
-    # Yes we want to run it as root too
-    chroot $R rosdep update
     echo "source /opt/ros/kinetic/setup.bash" >> $R/home/${USERNAME}/.bashrc
     chroot $R su ubuntu -c "mkdir -p /home/${USERNAME}/catkin_ws/src"
 
@@ -319,8 +316,7 @@ EOM
     echo "source /home/${USERNAME}/catkin_ws/devel/setup.bash" >> $R/home/${USERNAME}/.bashrc
     chroot $R su ubuntu -c "rosdep update"
 
-    chroot $R wget -O /home/${USERNAME}/catkin_ws/magni.rosinstall https://raw.githubusercontent.com/UbiquityRobotics/magni_robot/indigo-devel/magni.rosinstall
-    chroot $R su ubuntu -c "cd /home/${USERNAME}/catkin_ws; wstool init src /home/${USERNAME}/catkin_ws/magni.rosinstall"
+    chroot $R su ubuntu -c "cd /home/${USERNAME}/catkin_ws; git clone https://github.com/UbiquityRobotics/demos.git"
     chroot $R sh -c "cd /home/${USERNAME}/catkin_ws; rosdep install --from-paths src --ignore-src --rosdistro=kinetic -y"
     
     # Make sure that permissions are still sane
@@ -477,6 +473,7 @@ function install_software() {
 
     # Raspicam needs to be after configure_hardware
     chroot $R apt-get -y install ros-kinetic-raspicam-node
+    chroot $R apt-get -y install pifi
 
     if [ "${FLAVOUR}" != "ubuntu-minimal" ]; then
         # FIXME - Replace with meta packages(s)
