@@ -166,8 +166,6 @@ function ros_packages() {
 
     chroot $R apt-get update
     chroot $R apt-get -y install ros-kinetic-desktop
-
-    chroot $R apt-get -y install ros-kinetic-magni-robot
 }
 
 # Install meta packages
@@ -309,6 +307,8 @@ EOM
 deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity xenial main
 EOM
     chroot $R apt-get update
+
+    chroot $R apt-get -y install ros-kinetic-magni-robot ros-kinetic-magni-*
 
     echo "source /opt/ros/kinetic/setup.bash" >> $R/home/${USERNAME}/.bashrc
     chroot $R su ubuntu -c "mkdir -p /home/${USERNAME}/catkin_ws/src"
