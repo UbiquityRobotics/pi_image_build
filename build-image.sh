@@ -334,8 +334,8 @@ EOM
     chroot $R chown -R ubuntu:ubuntu /home/ubuntu
     chroot $R su ubuntu -c "bash -c 'cd /home/${USERNAME}/catkin_ws; source /opt/ros/kinetic/setup.bash; catkin_make;'"
 
-    chroot $R cp files/magni-base.sh $R/usr/sbin/magni-base
-    chmod +x /usr/sbin/magni-base
+    cp files/magni-base.sh $R/usr/sbin/magni-base
+    chroot $R chmod +x /usr/sbin/magni-base
 
     cat <<EOM >$R/etc/systemd/system/magni-base.service 
 [Unit]
