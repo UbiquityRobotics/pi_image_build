@@ -48,6 +48,8 @@ DEVICE_R=${BUILDDIR}/pi
 ARCH=$(uname -m)
 export TZ=UTC
 
+IMAGE_HOSTNAME="ubiquityrobot"
+
 USERNAME="ubuntu"
 OEM_CONFIG=0
 

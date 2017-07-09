@@ -257,14 +257,14 @@ function configure_ssh() {
 
 function configure_network() {
     # Set up hosts
-    echo ${FLAVOUR} >$R/etc/hostname
+    echo ${IMAGE_HOSTNAME} >$R/etc/hostname
     cat <<EOM >$R/etc/hosts
 127.0.0.1       localhost
 ::1             localhost ip6-localhost ip6-loopback
 ff02::1         ip6-allnodes
 ff02::2         ip6-allrouters
 
-127.0.1.1       ${FLAVOUR} ${FLAVOUR}.local
+127.0.1.1       ${IMAGE_HOSTNAME} ${IMAGE_HOSTNAME}.local
 EOM
 
     # Set up interfaces
@@ -292,6 +292,12 @@ auto eth0
 iface eth0 inet dhcp
 EOM
     fi
+
+    cat <<EOM >$R/etc/NetworkManager/dnsmasq-shared.d/hosts.conf
+address=/robot.ubiquityrobotics.com/10.42.0.1
+address=/ubiquityrobot/10.42.0.1
+EOM
+
 }
 
 function configure_ros() {
@@ -310,6 +316,10 @@ EOM
 
     chroot $R apt-get -y install ros-kinetic-magni-robot ros-kinetic-magni-*
 
+    chroot $R apt-get install -y ros-kinetic-tf2-web-republisher \
+    ros-kinetic-rosbridge-server ros-kinetic-nav-core ros-kinetic-move-base-msgs \
+    ros-kinetic-sick-tim ros-kinetic-ubiquity-motor ros-kinetic-robot-upstart nginx
+
     echo "source /opt/ros/kinetic/setup.bash" >> $R/home/${USERNAME}/.bashrc
     chroot $R su ubuntu -c "mkdir -p /home/${USERNAME}/catkin_ws/src"
 
@@ -323,6 +333,22 @@ EOM
     # Make sure that permissions are still sane
     chroot $R chown -R ubuntu:ubuntu /home/ubuntu
     chroot $R su ubuntu -c "bash -c 'cd /home/${USERNAME}/catkin_ws; source /opt/ros/kinetic/setup.bash; catkin_make;'"
+
+    chroot $R cp files/magni-base.sh $R/usr/sbin/magni-base
+    chmod +x /usr/sbin/magni-base
+
+    cat <<EOM >$R/etc/systemd/system/magni-base.service 
+[Unit]
+After=NetworkManager.service time-sync.target
+[Service]
+Type=simple
+User=ubuntu
+ExecStart=/usr/sbin/magni-base
+[Install]
+WantedBy=multi-user.target
+EOM
+    chroot $R /bin/systemctl enable magni-base.service 
+
 }
 
 function disable_services() {
@@ -481,7 +507,7 @@ function install_software() {
 
         # Install some useful utils
         chroot $R apt-get -y install \
-        vim nano emacs htop
+        vim nano emacs htop screen
 
         # Python
         chroot $R apt-get -y install \
