@@ -318,7 +318,8 @@ EOM
 
     chroot $R apt-get install -y ros-kinetic-tf2-web-republisher \
     ros-kinetic-rosbridge-server ros-kinetic-nav-core ros-kinetic-move-base-msgs \
-    ros-kinetic-sick-tim ros-kinetic-ubiquity-motor ros-kinetic-robot-upstart nginx
+    ros-kinetic-sick-tim ros-kinetic-ubiquity-motor ros-kinetic-robot-upstart \
+    ros-kinetic-teleop-twist-keyboard nginx
 
     echo "source /opt/ros/kinetic/setup.bash" >> $R/home/${USERNAME}/.bashrc
     chroot $R su ubuntu -c "mkdir -p /home/${USERNAME}/catkin_ws/src"
@@ -336,7 +337,7 @@ EOM
 
     cp files/magni-base.sh $R/usr/sbin/magni-base
     chroot $R chmod +x /usr/sbin/magni-base
-
+    
     cat <<EOM >$R/etc/systemd/system/magni-base.service 
 [Unit]
 After=NetworkManager.service time-sync.target
