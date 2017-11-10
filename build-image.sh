@@ -307,6 +307,7 @@ function configure_ros() {
     cat <<EOM >$R/etc/ros/rosdep/sources.list.d/30-ubiquity.list
 yaml https://raw.githubusercontent.com/UbiquityRobotics/rosdep/master/raspberry-pi.yaml
 EOM
+    chroot $R chmod a+r /etc/ros/rosdep/sources.list.d/30-ubiquity.list
     
     chroot $R apt-get update
 
