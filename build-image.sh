@@ -326,7 +326,11 @@ ExecStart=/usr/sbin/magni-base
 [Install]
 WantedBy=multi-user.target
 EOM
-    chroot $R /bin/systemctl enable magni-base.service 
+    if [ ${MAGNI_AUTOSTART} -eq 1 ]; then
+        chroot $R /bin/systemctl enable magni-base.service
+    else
+        chroot $R /bin/systemctl disable magni-base.service
+    fi
 
 }
 
@@ -476,6 +480,8 @@ function install_software() {
     # Raspicam needs to be after configure_hardware
     chroot $R apt-get -y install ros-kinetic-raspicam-node
     chroot $R apt-get -y install pifi
+
+    cp files/default_ap.em $R/etc/pifi/default_ap.em
 
     # FIXME - Replace with meta packages(s)
 

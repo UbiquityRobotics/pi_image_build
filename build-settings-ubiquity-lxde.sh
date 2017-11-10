@@ -24,8 +24,6 @@ RELEASE="xenial"
 VERSION="16.04.2"
 QUALITY=""
 
-GUI=1
-
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"
 
@@ -53,6 +51,9 @@ IMAGE_HOSTNAME="ubiquityrobot"
 
 USERNAME="ubuntu"
 OEM_CONFIG=0
+
+GUI=1
+MAGNI_AUTOSTART=1
 
 LOCAL_MIRROR=http://build-mirror.ubiquityrobotics.com/ubuntu/
 LOCAL_ROS_MIRROR=http://build-mirror.ubiquityrobotics.com/ros/
