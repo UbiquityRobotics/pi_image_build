@@ -112,6 +112,11 @@ EOM
     cat <<EOM >$R/etc/apt/sources.list.d/ros-latest.list
 deb ${ROS_MIRROR} xenial main
 EOM
+
+    # Add the apt repo that has some binary builds
+    cat <<EOM >$R/etc/apt/sources.list.d/ubiquity-latest.list
+deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity xenial main
+EOM
 }
 
 function apt_upgrade() {
@@ -308,10 +313,6 @@ function configure_ros() {
 yaml https://raw.githubusercontent.com/UbiquityRobotics/rosdep/master/raspberry-pi.yaml
 EOM
     
-    # Add the apt repo that has some binary builds
-    cat <<EOM >$R/etc/apt/sources.list.d/ubiquity-latest.list
-deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity xenial main
-EOM
     chroot $R apt-get update
 
     chroot $R apt-get -y install ros-kinetic-magni-robot ros-kinetic-magni-*
