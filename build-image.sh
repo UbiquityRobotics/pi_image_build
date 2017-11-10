@@ -112,11 +112,17 @@ EOM
     cat <<EOM >$R/etc/apt/sources.list.d/ros-latest.list
 deb ${ROS_MIRROR} xenial main
 EOM
+}
+
+function ubiquity_apt() {
+    chroot $R apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv-key C3032ED8
+    chroot $R apt-get -y install apt-transport-https
 
     # Add the apt repo that has some binary builds
     cat <<EOM >$R/etc/apt/sources.list.d/ubiquity-latest.list
 deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity xenial main
 EOM
+    chroot $R apt-get update
 }
 
 function apt_upgrade() {
@@ -167,7 +173,6 @@ function ubuntu_standard() {
 
 function ros_packages() {
     wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | chroot $R apt-key add -
-    chroot $R apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv-key C3032ED8
 
     chroot $R apt-get update
     chroot $R apt-get -y install ros-kinetic-desktop
@@ -283,7 +288,7 @@ EOM
 }
 
 function configure_ros() {
-    chroot $R apt-get -y install python-rosinstall python-wstool apt-transport-https
+    chroot $R apt-get -y install python-rosinstall python-wstool
     chroot $R rosdep init
     # Overlay that has our custom dependencies
     cat <<EOM >$R/etc/ros/rosdep/sources.list.d/30-ubiquity.list
@@ -687,6 +692,7 @@ function stage_01_base() {
     generate_locale
     apt_sources
     apt_upgrade
+    ubiquity_apt
     ubuntu_minimal
     ubuntu_standard
     ros_packages
