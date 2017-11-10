@@ -12,6 +12,17 @@
 
 set -ex
 
+trap exit_clean 1 2 3 6
+
+
+exit_clean()
+{
+  echo "Caught Signal ... cleaning up."
+  umount_system
+  echo "Done cleanup ... quitting."
+  exit 1
+}
+
 if [ -f build-settings.sh ]; then
     source build-settings.sh
 else
