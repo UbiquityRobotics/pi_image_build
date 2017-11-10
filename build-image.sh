@@ -132,6 +132,8 @@ function ubiquity_apt() {
     # Add the apt repo that has some binary builds
     cat <<EOM >$R/etc/apt/sources.list.d/ubiquity-latest.list
 deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity xenial main
+
+deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity xenial pi
 EOM
     chroot $R apt-get update
 }
@@ -497,6 +499,7 @@ function install_software() {
     chroot $R apt-get -y install ros-kinetic-raspicam-node
     chroot $R apt-get -y install pifi
 
+    mkdir $R/etc/pifi
     cp files/default_ap.em $R/etc/pifi/default_ap.em
 
     # FIXME - Replace with meta packages(s)
