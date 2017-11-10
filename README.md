@@ -6,6 +6,10 @@ A pre-built image available from our website.
 
   * <https://downloads.ubiquityrobotics.com/>
 
+## Login details
+
+The default user account is `ubuntu` with password `ubuntu`.
+
 ## Putting the image on microSDHC
 
 Download the image and then:
@@ -25,6 +29,8 @@ By default the image uses pifi for AP mode configuration.
 
 The AP name is UbiquityRobot followed by the last 4 digits of the pi MAC address.
 
+The AP password is `robotseverywhere`
+
 More details here: https://github.com/rohbotics/pifi
 
 ## Enable and Disable X11
@@ -42,3 +48,12 @@ Stop on this boot with `sudo systemctl stop magni-base`.
 Disable with `sudo systemctl disable magni-base`.
 
 Re-enable with `sudo systemctl enable magni-base`.
+
+## RTC
+The image is setup to use an `mcp7940x` RTC by default.
+
+You may want to use a different RTC by changing the line `dtoverlay=i2c-rtc,mcp7940x` in your `/boot/config.txt`.
+
+The systemd service `hwclock-sync` is responsible for syncing the system clock with the RTC on first boot, if you don't have an RTC you may wish to disable it.
+
+`systemctl disable hwclock-sync.service`
