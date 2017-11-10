@@ -692,11 +692,11 @@ function stage_01_base() {
     ros_packages
     apt_clean
     umount_system
-    sync_to "${DESKTOP_R}"
+#    sync_to "${DESKTOP_R}"
 }
 
 function stage_02_desktop() {
-    R="${DESKTOP_R}"
+    R="${BASE_R}"
     mount_system
     apt_sources
     chroot $R apt-get update
@@ -719,12 +719,12 @@ function stage_02_desktop() {
     apt_clean
     umount_system
     clean_up
-    sync_to ${DEVICE_R}
+#    sync_to ${BASE_R}
     make_tarball
 }
 
 function stage_03_raspi2() {
-    R=${DEVICE_R}
+    R=${BASE_R}
     mount_system
     apt_sources
     chroot $R apt-get update
@@ -734,11 +734,11 @@ function stage_03_raspi2() {
     apt_clean
     clean_up
     umount_system
-    make_raspi2_image ${FS_TYPE} ${FS_SIZE}
+#    make_raspi2_image ${FS_TYPE} ${FS_SIZE}
 }
 
 function stage_04_corrections() {
-    R=${DEVICE_R}
+    R=${BASE_R}
     mount_system
     apt_sources
 
