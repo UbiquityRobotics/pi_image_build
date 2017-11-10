@@ -159,7 +159,7 @@ function ubuntu_minimal() {
 
 # Install Ubuntu standard
 function ubuntu_standard() {
-    if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ ! -f "${R}/tmp/.standard" ]; then
+    if [ ! -f "${R}/tmp/.standard" ]; then
         chroot $R apt-get -y install ubuntu-standard
         touch "${R}/tmp/.standard"
     fi
@@ -229,20 +229,8 @@ function create_user() {
 # Prepare oem-config for first boot.
 function prepare_oem_config() {
     if [ ${OEM_CONFIG} -eq 1 ]; then
-        if [ "${FLAVOUR}" == "kubuntu" ]; then
-            chroot $R apt-get -y install --no-install-recommends oem-config-kde ubiquity-frontend-kde ubiquity-ubuntu-artwork
-        else
-            chroot $R apt-get -y install --no-install-recommends oem-config-gtk ubiquity-frontend-gtk ubiquity-ubuntu-artwork
-        fi
-
-        if [ "${FLAVOUR}" == "ubuntu" ]; then
-            chroot $R apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu
-        elif [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-            chroot $R apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu-mate
-            # Force the slideshow to use Ubuntu MATE artwork.
-            sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-mate/' $R/usr/lib/ubiquity/plugins/ubi-usersetup.py
-            sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-mate/' $R/usr/sbin/oem-config-remove-gtk
-        fi
+        chroot $R apt-get -y install --no-install-recommends oem-config-gtk ubiquity-frontend-gtk ubiquity-ubuntu-artwork
+        
         cp -a $R/usr/lib/oem-config/oem-config.service $R/lib/systemd/system
         cp -a $R/usr/lib/oem-config/oem-config.target $R/lib/systemd/system
         chroot $R /bin/systemctl enable oem-config.service
@@ -273,18 +261,7 @@ ff02::2         ip6-allrouters
 EOM
 
     # Set up interfaces
-    if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
-        cat <<EOM >$R/etc/network/interfaces
-# interfaces(5) file used by ifup(8) and ifdown(8)
-# Include files from /etc/network/interfaces.d:
-source-directory /etc/network/interfaces.d
-
-# The loopback network interface
-auto lo
-iface lo inet loopback
-EOM
-    else
-        cat <<EOM >$R/etc/network/interfaces
+    cat <<EOM >$R/etc/network/interfaces
 # interfaces(5) file used by ifup(8) and ifdown(8)
 # Include files from /etc/network/interfaces.d:
 source-directory /etc/network/interfaces.d
@@ -296,8 +273,8 @@ iface lo inet loopback
 auto eth0
 iface eth0 inet dhcp
 EOM
-    fi
 
+    # Add entries to DNS in AP mode
     cat <<EOM >$R/etc/NetworkManager/dnsmasq-shared.d/hosts.conf
 address=/robot.ubiquityrobotics.com/10.42.0.1
 address=/ubiquityrobot/10.42.0.1
@@ -422,10 +399,10 @@ function configure_hardware() {
     chown root:root $R/usr/bin/pi-top-*
     chmod +x $R/usr/bin/pi-top-*
 
-    if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
+    if [ "${GUI}" -eq 1 ]; then
         # Install fbturbo drivers on non composited desktop OS
         # fbturbo causes VC4 to fail
-        if [ "${FLAVOUR}" == "lubuntu" ] || [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
+        if [ "${GUI}" -eq 1]; then
             chroot $R apt-get -y install xserver-xorg-video-fbturbo
         fi
 
@@ -485,10 +462,6 @@ EOM
 
     # Add /boot/cmdline.txt
     echo "dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/cmdline.txt
-    # Enable VC4 on composited desktops
-    if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
-        echo "dtoverlay=vc4-kms-v3d" >> $R/boot/config.txt
-    fi
 
     # Set up fstab
     cat <<EOM >$R/etc/fstab
@@ -504,83 +477,50 @@ function install_software() {
     chroot $R apt-get -y install ros-kinetic-raspicam-node
     chroot $R apt-get -y install pifi
 
-    if [ "${FLAVOUR}" != "ubuntu-minimal" ]; then
-        # FIXME - Replace with meta packages(s)
+    # FIXME - Replace with meta packages(s)
 
-        # Install some useful utils
-        chroot $R apt-get -y install \
-        vim nano emacs htop screen
+    # Install some useful utils
+    chroot $R apt-get -y install \
+    vim nano emacs htop screen
 
-        # Python
-        chroot $R apt-get -y install \
-        python-minimal python3-minimal \
-        python-dev python3-dev \
-        python-pip python3-pip \
-        python-setuptools python3-setuptools
+    # Python
+    chroot $R apt-get -y install \
+    python-minimal python3-minimal \
+    python-dev python3-dev \
+    python-pip python3-pip \
+    python-setuptools python3-setuptools
 
-        # Python extras a Raspberry Pi hacker expects to be available ;-)
-        chroot $R apt-get -y install \
-        raspi-gpio \
-        python-rpi.gpio python3-rpi.gpio \
-        python-gpiozero python3-gpiozero \
-        pigpio python-pigpio python3-pigpio \
-        python-serial python3-serial \
-        python-spidev python3-spidev \
-        python-smbus python3-smbus \
-        python-astropi python3-astropi \
-        python-drumhat python3-drumhat \
-        python-envirophat python3-envirophat \
-        python-pianohat python3-pianohat \
-        python-pantilthat python3-pantilthat \
-        python-scrollphat python3-scrollphat \
-        python-st7036 python3-st7036 \
-        python-sn3218 python3-sn3218 \
-        python-piglow python3-piglow \
-        python-microdotphat python3-microdotphat \
-        python-mote python3-mote \
-        python-motephat python3-motephat \
-        python-explorerhat python3-explorerhat \
-        python-rainbowhat python3-rainbowhat \
-        python-sense-hat python3-sense-hat \
-        python-sense-emu python3-sense-emu sense-emu-tools \
-        python-picamera python3-picamera \
-        python-rtimulib python3-rtimulib \
-        python-pygame
+    # Python extras a Raspberry Pi hacker expects to be available ;-)
+    chroot $R apt-get -y install \
+    raspi-gpio \
+    python-rpi.gpio python3-rpi.gpio \
+    python-gpiozero python3-gpiozero \
+    pigpio python-pigpio python3-pigpio \
+    python-serial python3-serial \
+    python-spidev python3-spidev \
+    python-smbus python3-smbus \
+    python-astropi python3-astropi \
+    python-drumhat python3-drumhat \
+    python-envirophat python3-envirophat \
+    python-pianohat python3-pianohat \
+    python-pantilthat python3-pantilthat \
+    python-scrollphat python3-scrollphat \
+    python-st7036 python3-st7036 \
+    python-sn3218 python3-sn3218 \
+    python-piglow python3-piglow \
+    python-microdotphat python3-microdotphat \
+    python-mote python3-mote \
+    python-motephat python3-motephat \
+    python-explorerhat python3-explorerhat \
+    python-rainbowhat python3-rainbowhat \
+    python-sense-hat python3-sense-hat \
+    python-sense-emu python3-sense-emu sense-emu-tools \
+    python-picamera python3-picamera \
+    python-rtimulib python3-rtimulib \
+    python-pygame
 
-        chroot $R pip2 install codebug_tether
-        chroot $R pip3 install codebug_tether
-    fi
-
-    if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-        # Install the Minecraft PPA
-        chroot $R apt-add-repository -y ppa:flexiondotorg/minecraft
-        chroot $R apt-add-repository -y ppa:ubuntu-mate-dev/welcome
-        chroot $R apt-get update
-
-        # Python IDLE
-        chroot $R apt-get -y install idle idle3
-
-        # YouTube DL
-        chroot $R apt-get -y install ffmpeg rtmpdump
-        chroot $R apt-get -y --no-install-recommends install ffmpeg youtube-dl
-        chroot $R apt-get -y install youtube-dlg
-
-        # Scratch (nuscratch)
-        # - Requires: scratch and used to require wiringpi
-        cp deb/scratch_1.4.20131203-2_all.deb $R/tmp/wiringpi.deb
-        cp deb/wiringpi_2.32_armhf.deb $R/tmp/scratch.deb
-        chroot $R apt-get -y install /tmp/wiringpi.deb
-        chroot $R apt-get -y install /tmp/scratch.deb
-        chroot $R apt-get -y install nuscratch
-
-        # Minecraft
-        chroot $R apt-get -y install minecraft-pi python-picraft python3-picraft --allow-downgrades
-
-        # Sonic Pi
-        cp files/jackd.conf $R/tmp/
-        chroot $R debconf-set-selections -v /tmp/jackd.conf
-        chroot $R apt-get -y install sonic-pi
-    fi
+    chroot $R pip2 install codebug_tether
+    chroot $R pip3 install codebug_tether
 }
 
 function clean_up() {
@@ -755,25 +695,11 @@ function stage_02_desktop() {
     apt_sources
     chroot $R apt-get update
 
-    if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
-        echo "Skipping desktop install for ${FLAVOUR}"
-    elif [ "${FLAVOUR}" == "lubuntu" ]; then
-        install_meta ${FLAVOUR}-core --no-install-recommends
-        install_meta ${FLAVOUR}-desktop --no-install-recommends
-    elif [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-        # Install meta packages the "old" way for Xenial
-        if [ "${RELEASE}" == "xenial" ]; then
-            install_meta ${FLAVOUR}-core --no-install-recommends
-            install_meta ${FLAVOUR}-desktop --no-install-recommends
-        else
-            install_meta ${FLAVOUR}-core
-            install_meta ${FLAVOUR}-desktop
-        fi
-    elif [ "${FLAVOUR}" == "xubuntu" ]; then
-        install_meta ${FLAVOUR}-core
-        install_meta ${FLAVOUR}-desktop
+    if [ "${GUI}" -eq 1 ]; then
+        install_meta lubuntu-core --no-install-recommends
+        install_meta lubuntu-desktop --no-install-recommends
     else
-        install_meta ${FLAVOUR}-desktop
+        echo "Skipping desktop install for ${FLAVOUR}"
     fi
 
     create_groups
@@ -811,13 +737,6 @@ function stage_04_corrections() {
     apt_sources
 
     if [ "${RELEASE}" == "xenial" ]; then
-      # Add the MATE Desktop PPA for Xenial
-      if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-        chroot $R apt-add-repository -y ppa:ubuntu-mate-dev/xenial-mate
-        chroot $R apt-get update
-        chroot $R apt-get -y dist-upgrade
-      fi
-
       # Upgrade Xorg using HWE.
       chroot $R apt-get install -y --install-recommends \
       xserver-xorg-core-hwe-16.04 \

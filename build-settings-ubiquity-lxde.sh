@@ -19,11 +19,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ########################################################################
 
-FLAVOUR="lubuntu"
-FLAVOUR_NAME="Lubuntu"
+FLAVOUR="ubiquity-lxde"
 RELEASE="xenial"
 VERSION="16.04.2"
 QUALITY=""
+
+GUI=1
 
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"
