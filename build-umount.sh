@@ -32,9 +32,9 @@ if [ $(id -u) -ne 0 ]; then
 fi
 
 for R in $BASE_R $DESKTOP_R $DEVICE_R; do
-    umount -l $R/proc
-    umount -l $R/sys
-    umount -l $R/dev/pts
-    umount -l $R/dev
-    umount -l $R/dev/shm
+    umount -l $R/proc || true
+    umount -l $R/sys || true
+    umount -l $R/dev/pts || true
+    umount -l $R/dev || true
+    umount -l $R/dev/shm || true
 done
