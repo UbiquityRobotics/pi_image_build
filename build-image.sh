@@ -362,7 +362,7 @@ function disable_services() {
     # Disable ntp because systemd-timesyncd will take care of this.
     if [ -e $R/etc/init.d/ntp ]; then
         chroot $R /bin/systemctl disable ntp
-        chmod -x $R/usr/sbin/ntpd
+        chmod a-x $R/usr/sbin/ntpd
         cp files/prefer-timesyncd.service $R/lib/systemd/system/
         chroot $R /bin/systemctl enable prefer-timesyncd.service
     fi
