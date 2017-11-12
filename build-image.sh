@@ -673,6 +673,7 @@ function write_image_name() {
     cat <<EOM >./latest_image
 ${IMAGEDIR}/${IMAGE}
 EOM
+    chmod a+r ./latest_image
 }
 
 function make_hash() {
