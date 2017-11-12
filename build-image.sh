@@ -665,6 +665,8 @@ function make_raspi2_image() {
     umount -l "${MOUNTDIR}"
     losetup -d "${ROOT_LOOP}"
     losetup -d "${BOOT_LOOP}"
+
+    chmod a+r ${IMAGEDIR}/${IMAGE}
 }
 
 function write_image_name() {
@@ -796,4 +798,5 @@ stage_01_base
 stage_02_desktop
 stage_03_raspi2
 stage_04_corrections
+write_image_name
 #compress_image
