@@ -667,6 +667,12 @@ function make_raspi2_image() {
     losetup -d "${BOOT_LOOP}"
 }
 
+function write_image_name() {
+    cat <<EOM >./latest_image
+${IMAGEDIR}/${IMAGE}
+EOM
+}
+
 function make_hash() {
     local FILE="${1}"
     local HASH="sha256"
@@ -777,6 +783,8 @@ function stage_04_corrections() {
     fi
 
     # Insert other corrections here.
+
+    chmod a+r -R $R/etc/apt/sources.list.d/
 
     apt_clean
     clean_up
