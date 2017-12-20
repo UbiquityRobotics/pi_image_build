@@ -188,7 +188,11 @@ function ros_packages() {
     wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | chroot $R apt-key add -
 
     chroot $R apt-get update
-    chroot $R apt-get -y install ros-kinetic-desktop
+    chroot $R apt-get -y install ros-kinetic-desktop ros-kinetic-magni-robot \
+    ros-kinetic-magni-* ros-kinetic-tf2-web-republisher ros-kinetic-rosbridge-server \
+    ros-kinetic-nav-core ros-kinetic-move-base-msgs ros-kinetic-sick-tim \
+    ros-kinetic-ubiquity-motor ros-kinetic-robot-upstart \
+    ros-kinetic-teleop-twist-keyboard nginx
 }
 
 # Install meta packages
@@ -311,13 +315,6 @@ EOM
     
     chroot $R apt-get update
 
-    chroot $R apt-get -y install ros-kinetic-magni-robot ros-kinetic-magni-*
-
-    chroot $R apt-get install -y ros-kinetic-tf2-web-republisher \
-    ros-kinetic-rosbridge-server ros-kinetic-nav-core ros-kinetic-move-base-msgs \
-    ros-kinetic-sick-tim ros-kinetic-ubiquity-motor ros-kinetic-robot-upstart \
-    ros-kinetic-teleop-twist-keyboard nginx
-
     echo "source /opt/ros/kinetic/setup.bash" >> $R/home/${USERNAME}/.bashrc
     chroot $R su ubuntu -c "mkdir -p /home/${USERNAME}/catkin_ws/src"
 
@@ -331,6 +328,21 @@ EOM
     # Make sure that permissions are still sane
     chroot $R chown -R ubuntu:ubuntu /home/ubuntu
     chroot $R su ubuntu -c "bash -c 'cd /home/${USERNAME}/catkin_ws; source /opt/ros/kinetic/setup.bash; catkin_make;'"
+
+    # Setup ros environment variables in a file
+    chroot $R mkdir -p /etc/ubiquity
+    cat <<EOM >$R/etc/ubiquity/env.sh
+#!/bin/sh
+export ROS_HOSTNAME=$(hostname).local
+export ROS_MASTER_URI=http://$ROS_HOSTNAME:11311
+EOM
+    chroot $R chmod +x /etc/ubiquity/env.sh
+    chroot $R chmod a+r /etc/ubiquity/env.sh
+
+    # Make sure that the ros environment will be sourced for all users
+    echo "source /etc/ubiquity/env.sh" >> $R/home/ubuntu/.bashrc
+    echo "source /etc/ubiquity/env.sh" >> $R/root/.bashrc
+    echo "source /etc/ubiquity/env.sh" >> $R/etc/skel/.bashrc
 
     cp files/magni-base.sh $R/usr/sbin/magni-base
     chroot $R chmod +x /usr/sbin/magni-base

@@ -23,8 +23,7 @@ if [[ ! -d $log_path ]]; then
   fi
 fi
 
-export ROS_HOSTNAME=$(hostname).local
-export ROS_MASTER_URI=http://$ROS_HOSTNAME:11311
+source /etc/ubiquity/env.sh
 log info "magni-base: Launching ROS_HOSTNAME=$ROS_HOSTNAME, ROS_IP=$ROS_IP, ROS_MASTER_URI=$ROS_MASTER_URI, ROS_LOG_DIR=$log_path"
 
 # Punch it.
