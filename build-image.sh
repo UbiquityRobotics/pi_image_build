@@ -512,7 +512,7 @@ function install_software() {
     chroot $R apt-get -y install ros-kinetic-raspicam-node
     chroot $R apt-get -y install pifi
 
-    mkdir $R/etc/pifi
+    mkdir -p $R/etc/pifi
     cp files/default_ap.em $R/etc/pifi/default_ap.em
 
     # FIXME - Replace with meta packages(s)
