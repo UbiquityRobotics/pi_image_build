@@ -333,8 +333,8 @@ EOM
     chroot $R mkdir -p /etc/ubiquity
     cat <<EOM >$R/etc/ubiquity/env.sh
 #!/bin/sh
-export ROS_HOSTNAME=$(hostname).local
-export ROS_MASTER_URI=http://$ROS_HOSTNAME:11311
+export ROS_HOSTNAME=\$(hostname).local
+export ROS_MASTER_URI=http://\$ROS_HOSTNAME:11311
 EOM
     chroot $R chmod +x /etc/ubiquity/env.sh
     chroot $R chmod a+r /etc/ubiquity/env.sh
