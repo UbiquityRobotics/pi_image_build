@@ -239,26 +239,9 @@ function create_user() {
     local DATE=$(date +%m%H%M%S)
     local PASSWD=$(mkpasswd -m sha-512 ${USERNAME} ${DATE})
 
-    if [ ${OEM_CONFIG} -eq 1 ]; then
-        chroot $R addgroup --gid 29999 oem
-        chroot $R adduser --gecos "OEM Configuration (temporary user)" --add_extra_groups --disabled-password --gid 29999 --uid 29999 ${USERNAME}
-    else
-        chroot $R adduser --gecos "Ubuntu User" --add_extra_groups --disabled-password ${USERNAME}
-    fi
-    chroot $R usermod -a -G sudo -p ${PASSWD} ${USERNAME}
-}
+    chroot $R adduser --gecos "Ubuntu User" --add_extra_groups --disabled-password ${USERNAME}
 
-# Prepare oem-config for first boot.
-function prepare_oem_config() {
-    if [ ${OEM_CONFIG} -eq 1 ]; then
-        chroot $R apt-get -y install --no-install-recommends oem-config-gtk ubiquity-frontend-gtk ubiquity-ubuntu-artwork
-        
-        cp -a $R/usr/lib/oem-config/oem-config.service $R/lib/systemd/system
-        cp -a $R/usr/lib/oem-config/oem-config.target $R/lib/systemd/system
-        chroot $R /bin/systemctl enable oem-config.service
-        chroot $R /bin/systemctl enable oem-config.target
-        chroot $R /bin/systemctl set-default oem-config.target
-    fi
+    chroot $R usermod -a -G sudo -p ${PASSWD} ${USERNAME}
 }
 
 function configure_ssh() {
@@ -445,11 +428,6 @@ function configure_hardware() {
         # - Requires: libpcre3 libfreetype6 fonts-freefont-ttf dbus libssl1.0.0 libsmbclient libssh-4
         cp deb/omxplayer_0.3.7-git20160923-dfea8c9_armhf.deb $R/tmp/omxplayer.deb
         chroot $R apt-get -y install /tmp/omxplayer.deb
-
-        # Make Ubiquity "compatible" with the Raspberry Pi Foundation kernel.
-        if [ ${OEM_CONFIG} -eq 1 ]; then
-            cp plugininstall-${RELEASE}.py $R/usr/share/ubiquity/plugininstall.py
-        fi
     fi
 
     # Install Raspberry Pi system tweaks
@@ -752,7 +730,6 @@ function stage_02_desktop() {
 
     create_groups
     create_user
-    prepare_oem_config
     configure_ssh
     configure_network
     configure_ros
