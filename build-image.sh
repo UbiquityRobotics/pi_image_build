@@ -189,10 +189,11 @@ function ros_packages() {
 
     chroot $R apt-get update
     chroot $R apt-get -y install ros-kinetic-desktop ros-kinetic-magni-robot \
-    ros-kinetic-magni-* ros-kinetic-tf2-web-republisher ros-kinetic-rosbridge-server \
+    ros-kinetic-magni-* ros-kinetic-loki-base-node  ros-kinetic-loki-robot  \
+    ros-kinetic-loki-* ros-kinetic-tf2-web-republisher ros-kinetic-rosbridge-server \
     ros-kinetic-nav-core ros-kinetic-move-base-msgs ros-kinetic-sick-tim \
     ros-kinetic-ubiquity-motor ros-kinetic-robot-upstart \
-    ros-kinetic-teleop-twist-keyboard nginx
+    ros-kinetic-teleop-twist-keyboard ros-kinetic-camera-calibration nginx
 }
 
 # Install meta packages
