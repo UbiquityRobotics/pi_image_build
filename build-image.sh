@@ -330,10 +330,24 @@ EOM
 
     cp files/magni-base.sh $R/usr/sbin/magni-base
     chroot $R chmod +x /usr/sbin/magni-base
+
+    cat <<EOM >$R/etc/systemd/system/roscore.service 
+[Unit]
+After=NetworkManager.service time-sync.target
+[Service]
+Type=forking
+User=ubuntu
+# Start roscore as a fork and then wait for the tcp port to be opened
+ExecStart=/bin/sh -c ". /opt/ros/kinetic/setup.sh; . /etc/ubiquity/env.sh; roscore & while ! echo exit | nc localhost 11311 > /dev/null; do sleep 1; done"
+[Install]
+WantedBy=multi-user.target
+EOM
     
     cat <<EOM >$R/etc/systemd/system/magni-base.service 
 [Unit]
-After=NetworkManager.service time-sync.target
+Requires=roscore.service
+PartOf=roscore.service
+After=NetworkManager.service time-sync.target roscore.service
 [Service]
 Type=simple
 User=ubuntu
@@ -343,8 +357,10 @@ WantedBy=multi-user.target
 EOM
     if [ ${MAGNI_AUTOSTART} -eq 1 ]; then
         chroot $R /bin/systemctl enable magni-base.service
+        chroot $R /bin/systemctl enable roscore.service
     else
         chroot $R /bin/systemctl disable magni-base.service
+        chroot $R /bin/systemctl disable roscore.service
     fi
 
 }
