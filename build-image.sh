@@ -491,6 +491,7 @@ function configure_hardware() {
     cp files/config.txt $R/boot/
 
     cp device-tree/ubiquity-led-buttons.dtbo $R/boot/overlays
+    chown root:root $R/boot/overlays/ubiquity-led-buttons.dtbo
 
     cat <<EOM >$R/etc/systemd/system/hwclock-sync.service 
 [Unit] 
