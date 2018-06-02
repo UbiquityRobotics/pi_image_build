@@ -1,0 +1,72 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "brcm,bcm2708";
+
+	fragment@0 {
+		target = <&leds>;
+		__overlay__ {
+			status_led0: status_led0 {
+				label = "pifi_led";
+				gpios = <&gpio 5 0>;
+				default-state = "off";
+			};
+			status_led1: status_led1 {
+				label = "status_led";
+				gpios = <&gpio 25 0>;
+				default-state = "off";
+			};
+		};
+	};
+
+	fragment@1 {
+		// Configure the gpio pin controller
+		target = <&gpio>;
+		__overlay__ {
+			pin_state_button0: pifi_button_pins {
+				brcm,pins = <13>; // gpio number
+				brcm,function = <0>; // 0 = input, 1 = output
+				brcm,pull = <2>; // 0 = none, 1 = pull down, 2 = pull up
+			};
+			pin_state_button1: pwr_button_pins {
+				brcm,pins = <6>; // gpio number
+				brcm,function = <0>; // 0 = input, 1 = output
+				brcm,pull = <2>; // 0 = none, 1 = pull down, 2 = pull up
+			};
+		};
+	};
+
+	fragment@2 {
+		target-path = "/";
+		__overlay__ {
+
+			pifi_button: pifi_button {
+				compatible = "gpio-keys";
+				pinctrl-names = "default";
+				pinctrl-0 = <&pin_state_button0>;
+				status = "okay";
+
+				key@13 {
+					linux,code = <171>;
+					gpios = <&gpio 13 1>;
+					label = "config";
+				};
+			};
+			pwr_button: pwr_button  {
+				compatible = "gpio-keys";
+				pinctrl-names = "default";
+				pinctrl-0 = <&pin_state_button1>;
+				status = "okay";
+
+				key@6 {
+					linux,code = <116>;
+					gpios = <&gpio 6 1>;
+					label = "poweroff";
+					debounce-interval = <1000>;
+				};
+			};
+		};
+	};
+
+};

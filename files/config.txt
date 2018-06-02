@@ -1200,3 +1200,5 @@ dtparam=i2c_arm=on
 # Additional overlays and parameters are documented /boot/overlays/README
 dtoverlay=pi3-miniuart-bt
 dtoverlay=i2c-rtc,mcp7940x
+
+dtoverlay=ubiquity-led-buttons

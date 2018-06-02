@@ -413,6 +413,16 @@ function disable_services() {
     if [ -e $R/usr/share/mate/autostart/mate-optimus.desktop ]; then
         rm -f $R/usr/share/mate/autostart/mate-optimus.desktop || true
     fi
+
+    # Disable unttended upgrades
+    # When plugging in a fresh image to the internet, unattended
+    # upgrades locks up the system trying to update
+    cat <<EOM >$R/etc/apt/apt.conf.d/10periodic
+APT::Periodic::Update-Package-Lists "0";
+APT::Periodic::Download-Upgradeable-Packages "0";
+APT::Periodic::AutocleanInterval "0"; 
+EOM
+
 }
 
 function configure_hardware() {
@@ -479,6 +489,8 @@ function configure_hardware() {
 
     # Add /boot/config.txt
     cp files/config.txt $R/boot/
+
+    cp device-tree/ubiquity-led-buttons.dtbo $R/boot/overlays
 
     cat <<EOM >$R/etc/systemd/system/hwclock-sync.service 
 [Unit] 
