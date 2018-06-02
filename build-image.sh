@@ -338,6 +338,12 @@ After=NetworkManager.service time-sync.target
 Type=forking
 User=ubuntu
 # Start roscore as a fork and then wait for the tcp port to be opened
+# ----------------------------------------------------------------
+# Source all the environment variables, start roscore in a fork
+# Since the service type is forking, systemd doesn't mark it as
+# 'started' until the original process exits, so we have the 
+# non-forked shell wait until it can connect to the tcp opened by
+# roscore, and then exit, preventing conflicts with dependant services
 ExecStart=/bin/sh -c ". /opt/ros/kinetic/setup.sh; . /etc/ubiquity/env.sh; roscore & while ! echo exit | nc localhost 11311 > /dev/null; do sleep 1; done"
 [Install]
 WantedBy=multi-user.target
