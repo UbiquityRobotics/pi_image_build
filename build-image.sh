@@ -528,6 +528,7 @@ function install_software() {
 
     mkdir -p $R/etc/pifi
     cp files/default_ap.em $R/etc/pifi/default_ap.em
+    cp files/pifi.conf $R/etc/pifi/pifi.conf
 
     # FIXME - Replace with meta packages(s)
 
