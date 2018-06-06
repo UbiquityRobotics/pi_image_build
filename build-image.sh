@@ -824,6 +824,15 @@ function stage_04_corrections() {
 
     # Insert other corrections here.
 
+# Disable cups trying to load modules that don't exist
+    cat <<EOM >$R/etc/modules-load.d/cups-filters.conf
+# Parallel printer driver modules loading for cups
+# LOAD_LP_MODULE was 'yes' in /etc/default/cups
+#lp
+#ppdev
+#parport_pc 
+EOM
+
     chmod a+r -R $R/etc/apt/sources.list.d/
 
     apt_clean
