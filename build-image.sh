@@ -300,6 +300,8 @@ EOM
     chroot $R apt-get update
 
     echo "source /opt/ros/kinetic/setup.bash" >> $R/home/${USERNAME}/.bashrc
+    echo "source /opt/ros/kinetic/setup.bash" >> $R/root/.bashrc
+    echo "source /opt/ros/kinetic/setup.bash" >> $R/etc/skel/.bashrc
     chroot $R su ubuntu -c "mkdir -p /home/${USERNAME}/catkin_ws/src"
 
     # It doesn't exsist yet, but we are sourcing it in anyway
@@ -327,6 +329,15 @@ EOM
     echo "source /etc/ubiquity/env.sh" >> $R/home/ubuntu/.bashrc
     echo "source /etc/ubiquity/env.sh" >> $R/root/.bashrc
     echo "source /etc/ubiquity/env.sh" >> $R/etc/skel/.bashrc
+
+
+    echo "export ROS_PARALLEL_JOBS=-j2 \
+# Limit the number of compile threads due to memory limits" >> $R/home/ubuntu/.bashrc
+    echo "export ROS_PARALLEL_JOBS=-j2 \
+# Limit the number of compile threads due to memory limits" >> $R/root/.bashrc
+    echo "export ROS_PARALLEL_JOBS=-j2 \
+# Limit the number of compile threads due to memory limits" >> $R/etc/skel/.bashrc
+
 
     cp files/magni-base.sh $R/usr/sbin/magni-base
     chroot $R chmod +x /usr/sbin/magni-base
