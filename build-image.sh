@@ -833,9 +833,9 @@ function stage_04_corrections() {
 #parport_pc 
 EOM
 
-
+    chroot $R apt-get -y purge firefox
     cp deb/firefox_52.0.2+build1-0ubuntu0.16.04.1_armhf.deb $R/tmp/firefox.deb
-    chroot $R apt-get -y install /tmp/firefox.deb
+    chroot $R apt-get -y --allow-downgrade install /tmp/firefox.deb
     rm $R/tmp/firefox.deb
     chroot $R apt-mark hold firefox
 
