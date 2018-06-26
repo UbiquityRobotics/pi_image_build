@@ -1,0 +1,3 @@
+# Robot Configuration
+sonars: None
+# sonars: 'pi_sonar_v1' # Un-comment to enable sonars

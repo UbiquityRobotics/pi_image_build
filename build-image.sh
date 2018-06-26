@@ -541,6 +541,9 @@ function install_software() {
     cp files/default_ap.em $R/etc/pifi/default_ap.em
     cp files/pifi.conf $R/etc/pifi/pifi.conf
 
+    mkdir -p $R/etc/ubiquity
+    cp files/robot.yaml $R/etc/ubiquity/robot.yaml
+
     # FIXME - Replace with meta packages(s)
 
     # Install some useful utils
