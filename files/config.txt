@@ -1198,7 +1198,11 @@ dtparam=i2c_arm=on
 #dtoverlay=lirc-rpi
 
 # Additional overlays and parameters are documented /boot/overlays/README
+
+# Allow UART and Bluetooth at the same time https://github.com/UbiquityRobotics/ubiquity_main/issues/126#issuecomment-429993821 
 dtoverlay=pi3-miniuart-bt
+core_freq=250
+
 dtoverlay=i2c-rtc,mcp7940x
 
 dtoverlay=ubiquity-led-buttons
