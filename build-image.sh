@@ -842,6 +842,9 @@ EOM
 
     chmod a+r -R $R/etc/apt/sources.list.d/
 
+    chroot $R apt-get -y install chrony
+    chroot $R apt-get -y install ros-kinetic-magni-demos ros-kinetic-magni-bringup ros-kinetic-magni-*
+
     apt_clean
     clean_up
     umount_system
