@@ -188,7 +188,7 @@ function ros_packages() {
     wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | chroot $R apt-key add -
 
     chroot $R apt-get update
-    chroot $R apt-get -y chrony
+    chroot $R apt-get -y install chrony
     chroot $R apt-get -y install ros-kinetic-desktop ros-kinetic-magni-robot \
     ros-kinetic-magni-bringup ros-kinetic-magni-* ros-kinetic-loki-base-node ros-kinetic-loki-robot  \
     ros-kinetic-loki-* ros-kinetic-tf2-web-republisher ros-kinetic-rosbridge-server \
