@@ -188,6 +188,7 @@ function ros_packages() {
     wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | chroot $R apt-key add -
 
     chroot $R apt-get update
+    chroot $R apt-get -y chrony
     chroot $R apt-get -y install ros-kinetic-desktop ros-kinetic-magni-robot \
     ros-kinetic-magni-bringup ros-kinetic-magni-* ros-kinetic-loki-base-node ros-kinetic-loki-robot  \
     ros-kinetic-loki-* ros-kinetic-tf2-web-republisher ros-kinetic-rosbridge-server \
@@ -388,14 +389,6 @@ function disable_services() {
         chroot $R /bin/systemctl disable brltty.service
     fi
 
-    # Disable ntp because systemd-timesyncd will take care of this.
-    if [ -e $R/etc/init.d/ntp ]; then
-        chroot $R /bin/systemctl disable ntp
-        chmod a-x $R/usr/sbin/ntpd
-        cp files/prefer-timesyncd.service $R/lib/systemd/system/
-        chroot $R /bin/systemctl enable prefer-timesyncd.service
-    fi
-
     # Disable irqbalance because it is of little, if any, benefit on ARM.
     if [ -e $R/etc/init.d/irqbalance ]; then
         chroot $R /bin/systemctl disable irqbalance
@@ -432,6 +425,7 @@ function disable_services() {
 APT::Periodic::Update-Package-Lists "0";
 APT::Periodic::Download-Upgradeable-Packages "0";
 APT::Periodic::AutocleanInterval "0"; 
+
 EOM
     cat <<EOM >$R/etc/apt/apt.conf.d/20auto-upgrades
 APT::Periodic::Update-Package-Lists "0";
