@@ -4,4 +4,4 @@
 #   adduser.local USER UID GID HOME
 
 # Add user to the Raspberry Pi specific groups
-usermod -a -G adm,dialout,gpio,i2c,input,spi,video,ssl-cert $1
+usermod -a -G adm,dialout,gpio,i2c,input,spi,video,bluetooth,ssl-cert $1

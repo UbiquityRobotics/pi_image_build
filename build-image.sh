@@ -230,6 +230,7 @@ function create_groups() {
     chroot $R groupadd -f --system i2c
     chroot $R groupadd -f --system input
     chroot $R groupadd -f --system spi
+    chroot $R groupadd -f --system bluetooth
 
     # Create adduser hook
     cp files/adduser.local $R/usr/local/sbin/adduser.local
