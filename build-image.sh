@@ -193,7 +193,7 @@ function ros_packages() {
     ros-kinetic-magni-bringup ros-kinetic-magni-* ros-kinetic-loki-base-node ros-kinetic-loki-robot  \
     ros-kinetic-loki-* ros-kinetic-tf2-web-republisher ros-kinetic-rosbridge-server \
     ros-kinetic-nav-core ros-kinetic-move-base-msgs ros-kinetic-sick-tim \
-    ros-kinetic-ubiquity-motor ros-kinetic-robot-upstart \
+    ros-kinetic-ubiquity-motor ros-kinetic-pi-sonar ros-kinetic-robot-upstart \
     ros-kinetic-teleop-twist-keyboard ros-kinetic-camera-calibration nginx
 }
 
