@@ -589,6 +589,38 @@ function install_software() {
     chroot $R pip3 install codebug_tether
 }
 
+function branding() {
+    # Set Desktop and Lockscreen Background
+    cp branding/magni_wallpaper.png $R/usr/local/share/magni_wallpaper.png
+    
+    pcman_conf = $R/home/ubuntu/.config/pcmanfm/lubuntu/desktop-items-0.conf
+    sed -i s'/wallpaper_mode=.*/wallpaper_mode=screen/' $pcman_conf
+    sed -i s',wallpaper0=.*,wallpaper0=/usr/local/share/magni_wallpaper.png,' $pcman_conf
+    sed -i s',wallpaper=.*,wallpaper=/usr/local/share/magni_wallpaper.png,' $pcman_conf
+    
+    sed -i s',bg=.*,bg=/usr/local/share/magni_wallpaper.png,' $R/etc/lxdm/default.conf
+    sed -i s',background=.*,background=/usr/local/share/magni_wallpaper.png,' $R/etc/lightdm/lightdm-gtk-greeter.conf.d/30_lubuntu.conf
+
+    # Set plymouth splash
+    cp -r branding/ubiquity-plymouth $R/usr/share/plymouth/themes/ubiquity-logo
+    chroot $R ln -sf /usr/share/plymouth/themes/ubiquity-logo/ubiquity-logo.plymouth /etc/alternatives/default.plymouth
+
+    # Message of the Day Customization
+    chmod -x $R/etc/update-motd.d/10-help-text
+    chmod -x $R/etc/update-motd.d/91-release-upgrade
+
+    cat <<EOM >$R/etc/update-motd.d/50-ubiquity
+#!/bin/sh
+
+echo ""
+echo "Welcome to the Ubiquity Robotics Raspberry Pi Image"
+echo "Learn more: https://learn.ubiquityrobotics.com"
+echo ""
+echo "Wifi can be managed with pifi (pifi --help for more info)"
+EOM
+    chmod +x $R/etc/update-motd.d/50-ubiquity
+}
+
 function clean_up() {
     rm -f $R/etc/apt/*.save || true
     rm -f $R/etc/apt/sources.list.d/*.save || true
@@ -845,6 +877,9 @@ EOM
 
     chroot $R apt-get -y install chrony
     chroot $R apt-get -y install ros-kinetic-magni-demos ros-kinetic-magni-bringup ros-kinetic-magni-*
+
+    # Do all the branding things
+    branding
 
     apt_clean
     clean_up

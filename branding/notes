@@ -1,0 +1,7 @@
+/etc/lightdm/lightdm-gtk-greeter.conf.d/30_lubuntu.conf
+
+/etc/lxdm/default.conf
+.config/pcmanfm/lubuntu/desktop-items-0.conf
+
+
+sudo ln -sf /usr/share/plymouth/themes/ubiquity-plymouth/ubiquity-logo.plymouth /etc/alternatives/default.plymouth

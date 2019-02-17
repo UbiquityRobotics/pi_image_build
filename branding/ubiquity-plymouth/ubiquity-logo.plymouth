@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Ubiquity Logo
+Description=A theme that features a blank background with a logo.
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/ubiquity-logo
+ScriptFile=/usr/share/plymouth/themes/ubiquity-logo/ubiquity-logo.script
