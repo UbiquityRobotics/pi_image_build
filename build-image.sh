@@ -593,12 +593,17 @@ function branding() {
     # Set Desktop and Lockscreen Background
     cp branding/magni_wallpaper.png $R/usr/local/share/magni_wallpaper.png
     
-    local pcman_conf=$R/home/ubuntu/.config/pcmanfm/lubuntu/desktop-items-0.conf
-    sed -i s'/wallpaper_mode=.*/wallpaper_mode=screen/' $pcman_conf
+    local pcman_conf=$R/etc/xdg/pcmanfm/lubuntu/pcmanfm.conf
+    sed -i s'/wallpaper_mode=center/wallpaper_mode=screen/' $pcman_conf
     sed -i s',wallpaper0=.*,wallpaper0=/usr/local/share/magni_wallpaper.png,' $pcman_conf
     sed -i s',wallpaper=.*,wallpaper=/usr/local/share/magni_wallpaper.png,' $pcman_conf
+    local pcman_conf2=$R/etc/xdg/pcmanfm/lubuntu/desktop-items-0.conf
+    sed -i s'/wallpaper_mode=center/wallpaper_mode=screen/' $pcman2_conf
+    sed -i s',wallpaper0=.*,wallpaper0=/usr/local/share/magni_wallpaper.png,' $pcman2_conf
+    sed -i s',wallpaper=.*,wallpaper=/usr/local/share/magni_wallpaper.png,' $pcman2_conf
     
     sed -i s',bg=.*,bg=/usr/local/share/magni_wallpaper.png,' $R/etc/lxdm/default.conf
+    sed -i s',bg=.*,bg=/usr/local/share/magni_wallpaper.png,' $R/etc/xdg//lubuntu/lxdm/lxdm.conf
     sed -i s',background=.*,background=/usr/local/share/magni_wallpaper.png,' $R/etc/lightdm/lightdm-gtk-greeter.conf.d/30_lubuntu.conf
 
     # Set plymouth splash
@@ -615,6 +620,7 @@ function branding() {
 echo ""
 echo "Welcome to the Ubiquity Robotics Raspberry Pi Image"
 echo "Learn more: https://learn.ubiquityrobotics.com"
+echo "Like our image? Support us on PayPal: tips@ubiquityrobotics.com"
 echo ""
 echo "Wifi can be managed with pifi (pifi --help for more info)"
 EOM
