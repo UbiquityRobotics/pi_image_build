@@ -602,7 +602,6 @@ function branding() {
     sed -i s',wallpaper0=.*,wallpaper0=/usr/local/share/magni_wallpaper.png,' $pcman2_conf
     sed -i s',wallpaper=.*,wallpaper=/usr/local/share/magni_wallpaper.png,' $pcman2_conf
     
-    sed -i s',bg=.*,bg=/usr/local/share/magni_wallpaper.png,' $R/etc/lxdm/default.conf
     sed -i s',bg=.*,bg=/usr/local/share/magni_wallpaper.png,' $R/etc/xdg//lubuntu/lxdm/lxdm.conf
     sed -i s',background=.*,background=/usr/local/share/magni_wallpaper.png,' $R/etc/lightdm/lightdm-gtk-greeter.conf.d/30_lubuntu.conf
 
