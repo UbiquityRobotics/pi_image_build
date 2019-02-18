@@ -897,4 +897,4 @@ stage_02_desktop
 stage_03_raspi2
 stage_04_corrections
 write_image_name
-#compress_image
+compress_image

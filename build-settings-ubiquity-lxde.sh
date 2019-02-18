@@ -39,6 +39,7 @@ TARBALL="${FLAVOUR}-${VERSION}${QUALITY}-desktop-armhf-rootfs.tar.bz2"
 TIMESTAMP=$(date +%Y-%m-%d)	
 IMAGE="${TIMESTAMP}-ubiquity-xenial-lxde-raspberry-pi.img"
 IMAGEDIR=/image-builds/final-images/
+mkdir -p /image-builds/final-images/
 BASEDIR=/image-builds/PiFlavourMaker/${RELEASE}
 BUILDDIR=${BASEDIR}/${FLAVOUR}
 BASE_R=${BASEDIR}/base
@@ -46,6 +47,8 @@ DESKTOP_R=${BUILDDIR}/desktop
 DEVICE_R=${BUILDDIR}/pi
 ARCH=$(uname -m)
 export TZ=UTC
+locale-gen "en_US.UTF-8"
+update-locale
 
 IMAGE_HOSTNAME="ubiquityrobot"
 
@@ -55,5 +58,4 @@ OEM_CONFIG=0
 GUI=1
 MAGNI_AUTOSTART=1
 
-LOCAL_MIRROR=http://build-mirror.ubiquityrobotics.com/ubuntu/
-LOCAL_ROS_MIRROR=http://build-mirror.ubiquityrobotics.com/ros/
+LOCAL_MIRROR=http://us-east-2.ec2.ports.ubuntu.com/ubuntu-ports
