@@ -597,7 +597,7 @@ function branding() {
     sed -i s'/wallpaper_mode=center/wallpaper_mode=screen/' $pcman_conf
     sed -i s',wallpaper0=.*,wallpaper0=/usr/local/share/magni_wallpaper.png,' $pcman_conf
     sed -i s',wallpaper=.*,wallpaper=/usr/local/share/magni_wallpaper.png,' $pcman_conf
-    local pcman_conf2=$R/etc/xdg/pcmanfm/lubuntu/desktop-items-0.conf
+    local pcman2_conf=$R/etc/xdg/pcmanfm/lubuntu/desktop-items-0.conf
     sed -i s'/wallpaper_mode=center/wallpaper_mode=screen/' $pcman2_conf
     sed -i s',wallpaper0=.*,wallpaper0=/usr/local/share/magni_wallpaper.png,' $pcman2_conf
     sed -i s',wallpaper=.*,wallpaper=/usr/local/share/magni_wallpaper.png,' $pcman2_conf
