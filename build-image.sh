@@ -593,7 +593,7 @@ function branding() {
     # Set Desktop and Lockscreen Background
     cp branding/magni_wallpaper.png $R/usr/local/share/magni_wallpaper.png
     
-    local pcman_conf = $R/home/ubuntu/.config/pcmanfm/lubuntu/desktop-items-0.conf
+    local pcman_conf=$R/home/ubuntu/.config/pcmanfm/lubuntu/desktop-items-0.conf
     sed -i s'/wallpaper_mode=.*/wallpaper_mode=screen/' $pcman_conf
     sed -i s',wallpaper0=.*,wallpaper0=/usr/local/share/magni_wallpaper.png,' $pcman_conf
     sed -i s',wallpaper=.*,wallpaper=/usr/local/share/magni_wallpaper.png,' $pcman_conf
