@@ -780,7 +780,7 @@ function compress_image() {
     rm -rf ${IMAGEDIR}/*
     mkdir -p ${IMAGEDIR}
     echo "Compressing to: ${IMAGEDIR}/${IMAGE}.xz"
-    xz ${IMAGEDIR}/${IMAGE}
+    xz -4 ${IMAGEDIR}/${IMAGE}
 }
 
 function stage_01_base() {
