@@ -756,12 +756,10 @@ EOM
 function make_hash() {
     local FILE="${1}"
     local HASH="sha256"
-    local KEY="FFEE1E5C"
     if [ ! -f ${FILE}.${HASH}.sign ]; then
         if [ -f ${FILE} ]; then
             ${HASH}sum ${FILE} > ${FILE}.${HASH}
             sed -i -r "s/ .*\/(.+)/  \1/g" ${FILE}.${HASH}
-            gpg --default-key ${KEY} --armor --output ${FILE}.${HASH}.sign --detach-sig ${FILE}.${HASH}
         else
             echo "WARNING! Didn't find ${FILE} to hash."
         fi
