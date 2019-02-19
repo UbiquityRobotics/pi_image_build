@@ -777,11 +777,10 @@ function make_tarball() {
 }
 
 function compress_image() {
-    if [ ! -e "${IMAGEDIR}/${IMAGE}.xz" ]; then
-        echo "Compressing to: ${IMAGEDIR}/${IMAGE}.xz"
-        xz ${IMAGEDIR}/${IMAGE}
-    fi
-    make_hash "${IMAGEDIR}/${IMAGE}.xz"
+    rm -rf ${IMAGEDIR}/*
+    mkdir -p ${IMAGEDIR}
+    echo "Compressing to: ${IMAGEDIR}/${IMAGE}.xz"
+    xz ${IMAGEDIR}/${IMAGE}
 }
 
 function stage_01_base() {
