@@ -777,7 +777,6 @@ function make_tarball() {
 }
 
 function compress_image() {
-    rm -rf ${IMAGEDIR}/*
     mkdir -p ${IMAGEDIR}
     echo "Compressing to: ${IMAGEDIR}/${IMAGE}.xz"
     xz -4 ${IMAGEDIR}/${IMAGE}
