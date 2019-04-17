@@ -80,10 +80,6 @@ function sync_to() {
 
 # Base debootstrap
 function bootstrap() {
-    # Required tools
-    apt-get -y install binfmt-support debootstrap f2fs-tools \
-    qemu-user-static rsync ubuntu-keyring whois
-
     # Use the same base system for all flavours.
     if [ ! -f "${R}/tmp/.bootstrap" ]; then
         if [ "${ARCH}" == "armv7l" ]; then
