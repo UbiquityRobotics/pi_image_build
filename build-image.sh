@@ -626,7 +626,7 @@ function fpga_tools() {
     chroot $R apt-get install build-essential clang bison flex \
         libreadline-dev gawk tcl-dev libffi-dev git mercurial graphviz \
         xdot pkg-config python python3 libftdi-dev git iverilog gtkwave \
-        scons libftdi1-dev libconfuse-dev python3-libusb1 python3-ftdi1 \
+        scons libftdi1-dev libconfuse-dev python3-ftdi1 \
         python3-serial python3-pip
 
     
@@ -644,7 +644,8 @@ function fpga_tools() {
     chroot $R su ubuntu -c 'bash -c "cd /home/ubuntu/icestorm-build/yosys; make"'
     chroot $R bash -c 'cd /home/ubuntu/icestorm-build/yosys; make install'
 
-    choot $R pip3 install tinyprog
+    chroot $R pip3 install tinyprog
+    chroot $R pip3 install libusb1
 }
 
 function clean_up() {
