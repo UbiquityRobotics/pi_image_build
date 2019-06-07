@@ -623,7 +623,7 @@ EOM
 }
 
 function fpga_tools() {
-    chroot $R apt-get install build-essential clang bison flex \
+    chroot $R apt-get -y install build-essential clang bison flex \
         libreadline-dev gawk tcl-dev libffi-dev git mercurial graphviz \
         xdot pkg-config python python3 libftdi-dev git iverilog gtkwave \
         scons libftdi1-dev libconfuse-dev python3-ftdi1 \
