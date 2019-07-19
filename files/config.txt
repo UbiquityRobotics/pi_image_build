@@ -1203,6 +1203,3 @@ dtparam=i2c_arm=on
 dtoverlay=pi3-miniuart-bt
 core_freq=250
 
-dtoverlay=i2c-rtc,mcp7940x
-
-dtoverlay=ubiquity-led-buttons
