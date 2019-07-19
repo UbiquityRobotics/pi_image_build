@@ -646,6 +646,12 @@ function fpga_tools() {
 
     chroot $R pip3 install tinyprog
     chroot $R pip3 install libusb1
+    
+    chroot $R su ubuntu -c 'bash -c "cd /home/ubuntu; mkdir hbrc_fpga_class"'
+    chroot $R su ubuntu -c 'bash -c "cd /home/ubuntu/hbrc_fpga_class; git clone --depth=1 https://github.com/hbrc-fpga-class/peripherals.git"'
+    chroot $R su ubuntu -c 'bash -c "cd /home/ubuntu/hbrc_fpga_class; git clone --depth=1 -b hba https://github.com/bob-linuxtoys/eedd.git"'
+    chroot $R su ubuntu -c 'bash -c "cd /home/ubuntu/hbrc_fpga_class/eedd; make"'
+    chroot $R bash -c "cd /home/ubuntu/hbrc_fpga_class/eedd; make install"
 }
 
 function clean_up() {
