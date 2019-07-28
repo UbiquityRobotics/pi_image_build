@@ -329,18 +329,16 @@ EOM
     echo "source /etc/ubiquity/env.sh" >> $R/etc/skel/.bashrc
 
 
-    echo "export ROS_PARALLEL_JOBS=-j2 \
+    echo "export ROS_PARALLEL_JOBS=-j1 \
 # Limit the number of compile threads due to memory limits" >> $R/home/ubuntu/.bashrc
-    echo "export ROS_PARALLEL_JOBS=-j2 \
+    echo "export ROS_PARALLEL_JOBS=-j1 \
 # Limit the number of compile threads due to memory limits" >> $R/root/.bashrc
-    echo "export ROS_PARALLEL_JOBS=-j2 \
+    echo "export ROS_PARALLEL_JOBS=-j1 \
 # Limit the number of compile threads due to memory limits" >> $R/etc/skel/.bashrc
 
 
-    cp files/magni-base.sh $R/usr/sbin/magni-base
-    chroot $R chmod +x /usr/sbin/magni-base
-
-    cat <<EOM >$R/etc/systemd/system/roscore.service 
+    if [ ${ROSCORE_AUTOSTART} -eq 1 ]; then
+        cat <<EOM >$R/etc/systemd/system/roscore.service 
 [Unit]
 After=NetworkManager.service time-sync.target
 [Service]
@@ -357,8 +355,15 @@ ExecStart=/bin/sh -c ". /opt/ros/kinetic/setup.sh; . /etc/ubiquity/env.sh; rosco
 [Install]
 WantedBy=multi-user.target
 EOM
-    
-    cat <<EOM >$R/etc/systemd/system/magni-base.service 
+        chroot $R /bin/systemctl enable roscore.service
+    fi
+   
+
+    if [ ${MAGNI_AUTOSTART} -eq 1 ]; then
+        cp files/magni-base.sh $R/usr/sbin/magni-base
+        chroot $R chmod +x /usr/sbin/magni-base
+
+        cat <<EOM >$R/etc/systemd/system/magni-base.service 
 [Unit]
 Requires=roscore.service
 PartOf=roscore.service
@@ -370,12 +375,7 @@ ExecStart=/usr/sbin/magni-base
 [Install]
 WantedBy=multi-user.target
 EOM
-    if [ ${MAGNI_AUTOSTART} -eq 1 ]; then
         chroot $R /bin/systemctl enable magni-base.service
-        chroot $R /bin/systemctl enable roscore.service
-    else
-        chroot $R /bin/systemctl disable magni-base.service
-        chroot $R /bin/systemctl disable roscore.service
     fi
 
 }

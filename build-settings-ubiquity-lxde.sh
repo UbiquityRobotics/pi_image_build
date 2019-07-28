@@ -56,6 +56,7 @@ USERNAME="ubuntu"
 OEM_CONFIG=0
 
 GUI=1
+ROSCORE_AUTOSTART=1
 MAGNI_AUTOSTART=1
 
 LOCAL_MIRROR=http://us-east-2.ec2.ports.ubuntu.com/ubuntu-ports
