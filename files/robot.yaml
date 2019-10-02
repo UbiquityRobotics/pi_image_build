@@ -1,3 +1,7 @@
 # Robot Configuration
+
+raspicam: {'position' : 'upward'}
+
 sonars: None
-# sonars: 'pi_sonar_v1' # Un-comment to enable sonars
+# sonars: 'pi_sonar_v1' # Use this to enable sonars
+
