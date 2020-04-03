@@ -59,4 +59,6 @@ GUI=1
 ROSCORE_AUTOSTART=1
 MAGNI_AUTOSTART=1
 
+UBIQUITY_TESTING_REPO=0
+
 LOCAL_MIRROR=http://us-east-2.ec2.ports.ubuntu.com/ubuntu-ports

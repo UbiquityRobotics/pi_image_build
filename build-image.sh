@@ -125,12 +125,20 @@ function ubiquity_apt() {
     chroot $R apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv-key C3032ED8
     chroot $R apt-get -y install apt-transport-https
 
-    # Add the apt repo that has some binary builds
-    cat <<EOM >$R/etc/apt/sources.list.d/ubiquity-latest.list
+    if [ ${UBIQUITY_TESTING_REPO} -eq 1 ]; then
+        cat <<EOM >$R/etc/apt/sources.list.d/ubiquity-latest.list
+deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity-testing xenial main
+
+deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity-testing xenial pi
+EOM
+    else
+        cat <<EOM >$R/etc/apt/sources.list.d/ubiquity-latest.list
 deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity xenial main
 
 deb https://packages.ubiquityrobotics.com/ubuntu/ubiquity xenial pi
 EOM
+    fi
+
     chroot $R apt-get update
 }
 
