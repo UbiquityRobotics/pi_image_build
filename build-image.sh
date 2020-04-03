@@ -723,8 +723,9 @@ function make_raspi2_image() {
     ROOT_LENGTH=$(echo "${PARTED_OUT}" | grep -e '^ 2'| xargs echo -n \
     | cut -d" " -f 4 | tr -d B)
 
-    BOOT_LOOP=$(losetup --show -f -o ${BOOT_OFFSET} --sizelimit ${BOOT_LENGTH} ${IMAGEDIR}/${IMAGE})
-    ROOT_LOOP=$(losetup --show -f -o ${ROOT_OFFSET} --sizelimit ${ROOT_LENGTH} ${IMAGEDIR}/${IMAGE})
+    IMG_LOOP=$(losetup --show -f -P ${IMAGEDIR}/${IMAGE})
+    BOOT_LOOP=${IMG_LOOP}p1
+    ROOT_LOOP=${IMG_LOOP}p2
     echo "/boot: offset ${BOOT_OFFSET}, length ${BOOT_LENGTH}"
     echo "/:     offset ${ROOT_OFFSET}, length ${ROOT_LENGTH}"
 
@@ -744,8 +745,7 @@ function make_raspi2_image() {
     sync
     umount -l "${MOUNTDIR}/boot"
     umount -l "${MOUNTDIR}"
-    losetup -d "${ROOT_LOOP}"
-    losetup -d "${BOOT_LOOP}"
+    losetup -d "${IMG_LOOP}"
 
     chmod a+r ${IMAGEDIR}/${IMAGE}
 }
