@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ########################################################################
 
-FLAVOUR="ubiquity-lxde"
+FLAVOUR="ubiquity-lxde-testing"
 RELEASE="xenial"
 VERSION="16.04.2"
 QUALITY=""
@@ -37,7 +37,7 @@ MAKE_TARBALL=0
 
 TARBALL="${FLAVOUR}-${VERSION}${QUALITY}-desktop-armhf-rootfs.tar.bz2"
 TIMESTAMP=$(date +%Y-%m-%d)	
-IMAGE="${TIMESTAMP}-ubiquity-xenial-lxde-raspberry-pi.img"
+IMAGE="${TIMESTAMP}-ubiquity-xenial-lxde-rpi-testing.img"
 IMAGEDIR=/image-builds/final-images/
 mkdir -p /image-builds/final-images/
 BASEDIR=/image-builds/PiFlavourMaker/${RELEASE}
