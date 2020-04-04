@@ -547,6 +547,9 @@ function install_software() {
     mkdir -p $R/etc/ubiquity
     cp files/robot.yaml $R/etc/ubiquity/robot.yaml
 
+    chroot $R apt-get -y install usbmount
+    cp files/usbmount.conf $R/etc/usbmount/usbmount.conf
+
     # FIXME - Replace with meta packages(s)
 
     # Install some useful utils
