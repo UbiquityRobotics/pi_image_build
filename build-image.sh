@@ -889,10 +889,6 @@ EOM
     # Do all the branding things
     branding
     
-    # Solves issue where SSH takes forever to start
-    # https://forum.ubiquityrobotics.com/t/ros-image-on-raspberry-pi-4/326/59
-    sed -i s'/TimeoutStartSec=5min/TimeoutStartSec=10sec/' $R/etc/systemd/system/network-online.target.wants/networking.service
-
     apt_clean
     clean_up
     umount_system
