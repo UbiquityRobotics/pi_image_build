@@ -550,6 +550,10 @@ function install_software() {
     chroot $R apt-get -y install usbmount
     cp files/usbmount.conf $R/etc/usbmount/usbmount.conf
 
+    # Solves issue where SSH takes forever to start
+    # https://forum.ubiquityrobotics.com/t/ros-image-on-raspberry-pi-4/326/59
+    sed -i s'/TimeoutStartSec=5min/TimeoutStartSec=10sec/' $R/lib/systemd/system/networking.service
+
     # FIXME - Replace with meta packages(s)
 
     # Install some useful utils
