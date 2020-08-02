@@ -635,6 +635,19 @@ echo ""
 echo "Wifi can be managed with pifi (pifi --help for more info)"
 EOM
     chmod +x $R/etc/update-motd.d/50-ubiquity
+    
+    cat <<EOM >$R/etc/update-motd.d/99-time-sync
+#!/bin/sh
+DATE = $(date +"%Y%m%d")
+if [[ $DATE < "20200101" ]]; then
+  echo ""
+  echo "WARNING: Your system time is incorrect, you need to install an RTC battery."
+  echo "More info here: http://learn.ubiquityrobotics.com/rtc"
+  echo ""
+fi
+
+EOM
+    chmod +x $R/etc/update-motd.d/99-time-sync
 }
 
 function clean_up() {
