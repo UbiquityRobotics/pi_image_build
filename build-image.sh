@@ -95,7 +95,10 @@ function bootstrap() {
 function generate_locale() {
     for LOCALE in $(chroot $R locale | cut -d'=' -f2 | grep -v : | sed 's/"//g' | uniq); do
         if [ -n "${LOCALE}" ]; then
-            chroot $R locale-gen $LOCALE
+            # C.UTF-8 is a fixed locale that cannot and does not need to be generated
+	    if [ "${LOCALE}" -ne "C.UTF-8"]; then
+                chroot $R locale-gen $LOCALE
+	    fi
         fi
     done
 }
