@@ -318,7 +318,7 @@ EOM
     chroot $R su ubuntu -c "rosdep update"
 
     chroot $R su ubuntu -c "cd /home/${USERNAME}/catkin_ws/src; git clone https://github.com/UbiquityRobotics/demos.git"
-    chroot $R sh -c "cd /home/${USERNAME}/catkin_ws; rosdep install --from-paths src --ignore-src --rosdistro=kinetic -y"
+    chroot $R sh -c "cd /home/${USERNAME}/catkin_ws; HOME=/home/ubuntu rosdep install --from-paths src --ignore-src --rosdistro=kinetic -y"
     
     # Make sure that permissions are still sane
     chroot $R chown -R ubuntu:ubuntu /home/ubuntu
