@@ -298,7 +298,7 @@ EOM
 }
 
 function configure_ros() {
-    chroot $R apt-get -y install python-rosinstall python-wstool
+    chroot $R apt-get -y install python-rosinstall python-wstool libproj-dev
     chroot $R rosdep init
     # Overlay that has our custom dependencies
     cat <<EOM >$R/etc/ros/rosdep/sources.list.d/30-ubiquity.list
@@ -598,6 +598,9 @@ function install_software() {
     python-picamera python3-picamera \
     python-rtimulib python3-rtimulib \
     python-pygame
+    
+    #enable pigpio daemon
+    chroot $R systemctl enable pigpiod
 
     chroot $R pip2 install codebug_tether
     chroot $R pip3 install codebug_tether
