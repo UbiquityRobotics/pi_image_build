@@ -657,7 +657,7 @@ gpu_mem=128
 ##
 ##     Default 1
 ##
-#boot_delay=0
+boot_delay=2
 
 ## boot_delay_ms
 ##     Wait for a given number of milliseconds in start.elf before loading
