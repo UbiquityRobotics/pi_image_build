@@ -201,7 +201,8 @@ function ros_packages() {
     ros-kinetic-loki-* ros-kinetic-tf2-web-republisher ros-kinetic-rosbridge-server \
     ros-kinetic-nav-core ros-kinetic-move-base-msgs ros-kinetic-sick-tim \
     ros-kinetic-ubiquity-motor ros-kinetic-pi-sonar ros-kinetic-robot-upstart \
-    ros-kinetic-teleop-twist-keyboard ros-kinetic-camera-calibration nginx
+    ros-kinetic-teleop-twist-keyboard ros-kinetic-camera-calibration nginx \
+    ros-kinetic-oled-display-node
 }
 
 # Install meta packages
