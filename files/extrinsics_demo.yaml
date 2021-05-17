@@ -1,0 +1,15 @@
+# in order to set the camera extrinsics with this yaml, it  should be placed inside 
+# .ros/camera_info/extrinsics_demo.yaml, then  "raspicam: {'position' : 'demo'}" 
+# should be placed inside /etc/ubiquity/robot.yaml
+
+# position of the camera x, y, z
+position:
+  - 0.0
+  - 0.0
+  - 0.0
+
+# orientation of the camera x, y, z
+orientation:
+  - 0.0
+  - 0.0
+  - 0.0
