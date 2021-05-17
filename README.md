@@ -57,3 +57,11 @@ You may want to use a different RTC by changing the line `dtoverlay=i2c-rtc,mcp7
 The systemd service `hwclock-sync` is responsible for syncing the system clock with the RTC on first boot, if you don't have an RTC you may wish to disable it.
 
 `systemctl disable hwclock-sync.service`
+
+## System files placement
+
+ - `robot.yaml` should be inside `/etc/ubiquity/robot.yaml`
+ - `extrinsics_demo.yaml` should be inside `.ros/camera_info/extrinsics_demo.yaml`
+ - `pifi.conf` should be inside `/etc/pifi/pifi.conf`
+ - `magni-base.sh` should be inside `/usr/sbin/magni-base`
+ - TODO where should other system files be?
