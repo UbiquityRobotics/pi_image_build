@@ -642,7 +642,7 @@ DATE = $(date +"%Y%m%d")
 if [[ $DATE < "20200101" ]]; then
   echo ""
   echo "WARNING: Your system time is incorrect, you need to install an RTC battery."
-  echo "More info here: http://learn.ubiquityrobotics.com/rtc"
+  echo "More info here: https://learn.ubiquityrobotics.com/unboxing#the-real-time-clock-battery"
   echo ""
 fi
 
