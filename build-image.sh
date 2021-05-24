@@ -315,7 +315,7 @@ EOM
 
     # It doesn't exsist yet, but we are sourcing it in anyway
     echo "source /home/${USERNAME}/catkin_ws/devel/setup.bash" >> $R/home/${USERNAME}/.bashrc
-    chroot $R su ubuntu -c "rosdep update"
+    chroot $R su ubuntu -c "rosdep update --include-eol-distros"
 
     chroot $R su ubuntu -c "cd /home/${USERNAME}/catkin_ws/src; git clone https://github.com/UbiquityRobotics/demos.git"
     chroot $R sh -c "cd /home/${USERNAME}/catkin_ws; HOME=/home/ubuntu rosdep install --from-paths src --ignore-src --rosdistro=kinetic -y"
