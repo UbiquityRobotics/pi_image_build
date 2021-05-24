@@ -23,6 +23,9 @@ if [[ ! -d $log_path ]]; then
   fi
 fi
 
+# uncomment this if you want ros log cleanup enabled on boot 
+#source $(rospack find magni_bringup)"/scripts/ros_log_clean.bash"
+
 source /etc/ubiquity/env.sh
 log info "magni-base: Launching ROS_HOSTNAME=$ROS_HOSTNAME, ROS_IP=$ROS_IP, ROS_MASTER_URI=$ROS_MASTER_URI, ROS_LOG_DIR=$log_path"
 
